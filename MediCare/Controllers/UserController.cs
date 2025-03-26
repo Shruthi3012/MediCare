@@ -47,7 +47,7 @@ namespace MediCare.Controllers
             newUser.Role = userViewModel.Role;
 
             _dbcontext.Users.InsertOne(newUser);
-            return View();
+            return View("UserReg");
         }
 
 

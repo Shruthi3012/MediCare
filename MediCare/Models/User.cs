@@ -7,7 +7,7 @@ namespace MediCare.Models
     {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
-        public int ObjectId { get; set; }
+        public string ObjectId { get; set; }
 
         [BsonElement("name")]
         public string Name { get; set; }

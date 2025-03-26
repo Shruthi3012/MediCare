@@ -21,8 +21,9 @@
     </div>
 
     <div class="mb-3 form-container">
-        <label name="emailId" id="emailId" class="form-label">Email</label>
+        <label for="emailId" class="form-label">Email</label>
         <input type="email" class="form-control" id="emailId" placeholder="name@example.com">
+
     </div>
 
     <div class="mb-3 form-container">
@@ -56,7 +57,7 @@
         const emailText = document.getElementById("emailId").value;
             const passwordText = document.getElementById("password").value;
         const roleRadioButtons = document.getElementsByName('role');
-        let selectedRoleText = ' ';
+        let selectedRoleText = null;
         roleRadioButtons.forEach(radioButton => {
             if (radioButton.checked) {
                 selectedRoleText = radioButton.nextElementSibling.textContent;
