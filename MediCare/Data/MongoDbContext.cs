@@ -20,6 +20,7 @@ namespace MediCare.Data
         public IMongoCollection<User> Users => _database.GetCollection<User>("Users");
         public IMongoCollection<Specialization> Specializations => _database.GetCollection<Specialization>("Specializations");
 
+        public IMongoCollection<Doctor> Doctors => _database.GetCollection<Doctor>("Doctors");
 
     }
 }
