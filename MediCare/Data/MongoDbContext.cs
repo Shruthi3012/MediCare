@@ -21,6 +21,7 @@ namespace MediCare.Data
         public IMongoCollection<Specialization> Specializations => _database.GetCollection<Specialization>("Specializations");
 
         public IMongoCollection<Doctor> Doctors => _database.GetCollection<Doctor>("Doctors");
+        public IMongoCollection<Appointment> Appointments => _database.GetCollection<Appointment>("Appointments");
 
     }
 }

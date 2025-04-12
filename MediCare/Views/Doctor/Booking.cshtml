@@ -1,0 +1,421 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+   
+
+}
+@model MediCare.ViewModel.DoctorDetailsViewModel
+
+<head>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <style>
+        .calendar-container {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .calendar-nav {
+            cursor: pointer;
+            background: #f8f9fa;
+            border: none;
+            border-radius: 5px;
+            padding: 5px 10px;
+        }
+
+        .calendar-title {
+            font-weight: bold;
+            font-size: 1.2rem;
+            text-align: center;
+        }
+
+        .calendar-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            text-align: center;
+        }
+
+        .day-header {
+            font-weight: bold;
+            padding: 10px 0;
+        }
+
+        .day-cell {
+            padding: 10px 0;
+            border: 1px solid #eee;
+            cursor: pointer;
+        }
+
+            .day-cell:hover {
+                background-color: #f8f9fa;
+            }
+
+            .day-cell.inactive {
+                color: #ccc;
+            }
+
+            .day-cell.today {
+                background-color: #007bff;
+                color: white;
+            }
+
+            .day-cell.selected {
+                background-color: #28a745;
+                color: white;
+            }
+
+        .time-slots {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .time-slot {
+            padding: 8px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+            .time-slot:hover {
+                background-color: #f8f9fa;
+            }
+
+            .time-slot.selected {
+                background-color: #28a745;
+                color: white;
+            }
+
+        .booking-btn {
+            margin-top: 20px;
+        }
+    </style>
+
+</head>
+<body>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-sm-2"></div>
+            <div class="col-sm-8">
+                <form class="shadow p-3 mb-5 rounded-3" >
+                    <div class="row">
+                        <h3>Doctor Name</h3>
+                    </div>
+                   
+                    <div class="row">
+                        <div class="col-sm-6">
+
+                        </div>
+
+                        <div class="col-sm-6">
+                            <table>
+                                <tbody>
+                                    <tr>
+                                        <th> <b>Name:</b></th>
+                                        <td>@Model.Name</td>
+                                    </tr>
+                                    <tr>
+                                        <th><b>Degree:</b></th>
+                                        <td>@Model.Degree</td>
+                                    </tr>
+                                    <tr>
+                                        <th><b>Email:</b></th>
+                                        <td>@Model.Email</td>
+                                    </tr>
+                                    <tr>
+                                        <th><b>Specialization:   </b></th>
+                                        <td>@Model.Specialization</td>
+                                    </tr>
+                                    <tr>
+                                        <th><b>Time:</b></th>
+                                        <td>@Model.StartTime - @Model.EndTime</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <br />
+
+                    <!-- Calendar Section -->
+                    <div class="calendar-container">
+                        <div class="calendar-header">
+                            <button type="button" class="calendar-nav" id="prevMonth">&lt;&lt;</button>
+                            <div class="calendar-title" id="currentMonth">April 2025</div>
+                            <button type="button" class="calendar-nav" id="nextMonth">&gt;&gt;</button>
+                        </div>
+                        <div class="calendar-days" id="calendarDays">
+                            <div class="day-header">MON</div>
+                            <div class="day-header">TUE</div>
+                            <div class="day-header">WED</div>
+                            <div class="day-header">THU</div>
+                            <div class="day-header">FRI</div>
+                            <div class="day-header">SAT</div>
+                            <div class="day-header">SUN</div>
+                            <!-- Calendar cells will be generated by JavaScript -->
+                        </div>
+                    </div>
+
+                    <!-- Available Slots Section -->
+                    <div id="availableSlotsSection" style="display: none;">
+                        <h4>Available Slots</h4>
+                        <div class="time-slots" id="timeSlots">
+                            <!-- Time slots will be generated by JavaScript -->
+                        </div>
+                        <div class="text-center mt-4">
+                            <button type="button" class="btn btn-primary booking-btn" id="bookAppointment">Book Appointment</button>
+                        </div>
+                    </div>
+
+                </form>
+              
+            </div>
+            <div class="col-sm-2"></div>
+        </div>
+    </div>
+    <br /><br />
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Initialize variables
+            let currentDate = new Date();
+            let selectedDate = null;
+            let selectedTimeSlot = null;
+
+            // Parse doctor's start and end times
+            const startTime = parseTime('@Model.StartTime');
+            const endTime = parseTime('@Model.EndTime');
+
+            function parseTime(timeString) {
+                const [hours, minutes] = timeString.split(':');
+                return { hours: parseInt(hours), minutes: parseInt(minutes) };
+            }
+
+            // Initialize calendar
+            updateCalendar(currentDate);
+
+            // Event listeners for navigation
+            document.getElementById('prevMonth').addEventListener('click', function () {
+                currentDate.setMonth(currentDate.getMonth() - 1);
+                updateCalendar(currentDate);
+            });
+
+            document.getElementById('nextMonth').addEventListener('click', function () {
+                currentDate.setMonth(currentDate.getMonth() + 1);
+                updateCalendar(currentDate);
+            });
+
+            // Function to update calendar
+            function updateCalendar(date) {
+                const year = date.getFullYear();
+                const month = date.getMonth();
+
+                // Set the month and year display
+                const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                    'July', 'August', 'September', 'October', 'November', 'December'];
+                document.getElementById('currentMonth').textContent = monthNames[month] + ' ' + year;
+
+                // Clear previous calendar
+                const calendarDays = document.getElementById('calendarDays');
+
+                // Keep the header row
+                const headerRow = calendarDays.querySelectorAll('.day-header');
+                calendarDays.innerHTML = '';
+                headerRow.forEach(header => calendarDays.appendChild(header));
+
+                // Get the first day of the month
+                const firstDay = new Date(year, month, 1);
+                let startingDay = firstDay.getDay(); // 0 = Sunday, 1 = Monday, etc.
+                if (startingDay === 0) startingDay = 7; // Convert Sunday from 0 to 7 for our Monday-based week
+
+                // Get the number of days in the month
+                const lastDay = new Date(year, month + 1, 0);
+                const totalDays = lastDay.getDate();
+
+                // Get the number of days in the previous month
+                const prevLastDay = new Date(year, month, 0);
+                const prevDays = prevLastDay.getDate();
+
+                // Create cells for days from previous month
+                for (let i = startingDay - 1; i > 0; i--) {
+                    const dayCell = document.createElement('div');
+                    dayCell.className = 'day-cell inactive';
+                    dayCell.textContent = prevDays - i + 1;
+                    calendarDays.appendChild(dayCell);
+                }
+
+                // Create cells for days in current month
+                const today = new Date();
+                for (let i = 1; i <= totalDays; i++) {
+                    const dayCell = document.createElement('div');
+                    dayCell.className = 'day-cell';
+                    dayCell.textContent = i;
+
+                    // Check if this day is today
+                    if (year === today.getFullYear() && month === today.getMonth() && i === today.getDate()) {
+                        dayCell.classList.add('today');
+                    }
+
+                    // Check if this day is selected
+                    if (selectedDate && year === selectedDate.getFullYear() &&
+                        month === selectedDate.getMonth() && i === selectedDate.getDate()) {
+                        dayCell.classList.add('selected');
+                    }
+
+                    // Add click event to select date
+                    dayCell.addEventListener('click', function () {
+                        // Remove selected class from previously selected date
+                        document.querySelectorAll('.day-cell').forEach(cell => {
+                            cell.classList.remove('selected');
+                        });
+
+                        // Add selected class to this date
+                        this.classList.add('selected');
+
+                        // Set selected date
+                        selectedDate = new Date(year, month, i);
+
+                        // Generate time slots for this date
+                        generateTimeSlots(selectedDate);
+
+                        // Show available slots section
+                        document.getElementById('availableSlotsSection').style.display = 'block';
+                    });
+
+                    calendarDays.appendChild(dayCell);
+                }
+
+                // Calculate the number of cells to add for the next month
+                const totalCells = 42; // 6 rows * 7 days
+                const nextDays = totalCells - (startingDay - 1 + totalDays);
+
+                // Create cells for days from next month
+                for (let i = 1; i <= nextDays; i++) {
+                    const dayCell = document.createElement('div');
+                    dayCell.className = 'day-cell inactive';
+                    dayCell.textContent = i;
+                    calendarDays.appendChild(dayCell);
+                }
+            }
+
+            // Function to generate time slots
+            function generateTimeSlots(date) {
+                const timeSlots = document.getElementById('timeSlots');
+                timeSlots.innerHTML = ''; // Clear previous slots
+
+                // Convert doctor's hours to minutes for easier calculation
+                const startMinutes = startTime.hours * 60 + startTime.minutes;
+                const endMinutes = endTime.hours * 60 + endTime.minutes;
+
+                // Generate slots at 30-minute intervals
+                for (let minutes = startMinutes; minutes < endMinutes; minutes += 15) {
+                    const hours = Math.floor(minutes / 60);
+                    const mins = minutes % 60;
+
+                    // Format the time
+                    const formattedTime =
+                        (hours < 10 ? '0' : '') + hours + ':' +
+                        (mins < 10 ? '0' : '') + mins;
+
+                    // Create the time slot element
+                    const timeSlot = document.createElement('div');
+                    timeSlot.className = 'time-slot';
+                    timeSlot.textContent = formattedTime;
+
+                    // Convert 24-hour format to 12-hour format for display
+                    const displayHours = hours % 12 || 12;
+                    const amPm = hours < 12 ? 'AM' : 'PM';
+                    timeSlot.textContent = displayHours + ':' + (mins < 10 ? '0' : '') + mins + ' ' + amPm;
+
+                    // Add click event to select time slot
+                    timeSlot.addEventListener('click', function () {
+                        // Remove selected class from previously selected time slot
+                        document.querySelectorAll('.time-slot').forEach(slot => {
+                            slot.classList.remove('selected');
+                        });
+
+                        // Add selected class to this time slot
+                        this.classList.add('selected');
+
+                        // Set selected time slot
+                        selectedTimeSlot = formattedTime;
+                    });
+
+                    timeSlots.appendChild(timeSlot);
+                }
+            }
+
+            // Add Book Appointment functionality
+            document.getElementById('bookAppointment').addEventListener('click', async function () {
+                if (!selectedDate || !selectedTimeSlot) {
+                    alert('Please select a date and time slot.');
+                    return;
+                }
+
+                // Format the date
+                const day = selectedDate.getDate();
+                const month = selectedDate.getMonth() + 1;
+                const year = selectedDate.getFullYear();
+                const formattedDate = year + '-' +
+                    (month < 10 ? '0' : '') + month + '-' +
+                    (day < 10 ? '0' : '') + day;
+
+                // Here you would typically submit the data to your backend
+                console.log('Booking appointment for:', formattedDate, selectedTimeSlot);
+
+                 const DocID = "@Model.DoctorID";
+
+                
+
+                const data = {
+                    DoctorID: DocID,
+                    Bookedtime: selectedTimeSlot,
+                    BookedDate: formattedDate
+                };
+
+                try {
+                    const jsonData = JSON.stringify(data);
+                    console.log("Sending data to server:", data);
+                    const response = await fetch('/Doctor/AddAppointment', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json; charset=utf-8'
+                        },
+                        body: jsonData
+                    });
+
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        console.error('Server response:', errorText);
+                        throw new Error('Failed to book appointment');
+                    }
+
+                    window.location.reload();
+                    console.log('Booked appointment successfully');
+                } catch (error) {
+                    console.error('Error:', error);
+                    window.location.reload();
+                }
+
+
+                // For now, just show an alert
+               // alert('Appointment booked for ' + day + '/' + month + '/' + year + ' at ' + selectedTimeSlot);
+            });
+        });
+    </script>
+</body>
+
+

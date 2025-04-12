@@ -31,6 +31,9 @@ namespace MediCare.Models
         [BsonElement("Degree")]
         public string Degree { get; set; }
 
+        [BsonElement("Description")]
+        public string Description { get; set; }
+
         
     }
 

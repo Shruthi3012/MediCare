@@ -11,7 +11,24 @@ namespace MediCare.ViewModel
         public string Specialization {  get; set; }
         public string StartTime { get; set; }
         public string EndTime { get; set; }
-        public string Degree { get; set; }  
+        public string Degree { get; set; }
+
+        public List<DoctorInfo> DoctorInfos { get; set; }
 
     }
+
+    public class DoctorInfo     
+    {
+        public string ObjectId { get; set; }
+        public int Id { get; set; } 
+        public string Name { get; set; }
+        public string Email { get; set; }
+        public string Specialization { get; set; }
+        public string StartTime { get; set; }
+        public string EndTime { get; set; }
+        public string Degree { get; set; }
+
+        public List<DateTime> bookedAppointments { get; set; }
+    }
+
 }

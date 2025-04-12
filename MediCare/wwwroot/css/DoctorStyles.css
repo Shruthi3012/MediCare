@@ -1,0 +1,47 @@
+﻿body {
+}
+
+.calendar-container {
+    padding: 10px;
+    border-right: 1px solid #dee2e6;
+}
+
+.time-slots-container {
+    padding: 10px;
+}
+
+.time-slots-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.time-slot {
+    padding: 10px;
+    border: 1px solid #dee2e6;
+    border-radius: 5px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+    .time-slot:hover {
+        background-color: #f8f9fa;
+    }
+
+    .time-slot.selected {
+        background-color: #198754;
+        color: white;
+    }
+
+    .time-slot.unavailable {
+        background-color: #f8f9fa;
+        color: #adb5bd;
+        cursor: not-allowed;
+    }
+
+.selected-info {
+    margin-right: auto;
+    font-weight: 500;
+}
