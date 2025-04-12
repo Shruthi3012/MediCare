@@ -10,4 +10,12 @@
     <PackageReference Include="MongoDB.Driver" Version="3.2.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Views\Doctor\DoctorAppointments.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <_ContentIncludedByDefault Remove="Views\Doctor\DoctorAppointments.cshtml" />
+  </ItemGroup>
+
 </Project>

@@ -48,6 +48,45 @@ namespace MediCare.Controllers
         
         }
 
+
+        [HttpGet]
+        public async Task<IActionResult> DoctorAppointments(string id)
+        {
+            if (string.IsNullOrEmpty(id))
+            {
+                return NotFound();
+            }
+            List<Appointment> appointmentsLst = await _dbcontext.Appointments.Find(s => s.DoctorId == id).ToListAsync();
+            if(appointmentsLst == null)
+            {
+                return NotFound();
+            }
+            var doctor = await _dbcontext.Doctors.Find(s => s.ObjectId == id).FirstOrDefaultAsync();
+            if (doctor == null)
+            {
+                return NotFound();
+            }
+            var specialization = await _dbcontext.Specializations.Find(s => s.ObjectId == doctor.SpecializationId).FirstOrDefaultAsync();
+            
+            List<AppointmentsViewModel> appointmentsViewModelList = new List<AppointmentsViewModel>();
+            foreach (Appointment appointment in appointmentsLst)
+            {
+                AppointmentsViewModel appointmentsViewModel = new AppointmentsViewModel();
+                appointmentsViewModel.AppId = appointment.ObjectId;
+                appointmentsViewModel.DoctorId = doctor.ObjectId;
+                appointmentsViewModel.DoctorName = doctor.Name;
+                appointmentsViewModel.BookedTime = appointment.BookedTime.ToString();
+                appointmentsViewModel.BookedDate = appointment.BookedDate.ToString();
+                appointmentsViewModel.Specialization = specialization != null ? specialization.SpecializationName : "Unknown";
+                appointmentsViewModelList.Add(appointmentsViewModel);
+            }
+            
+            return View(appointmentsViewModelList);
+
+        }
+
+
+
         [HttpGet]
         public async Task<IActionResult> DoctorPage()
         {

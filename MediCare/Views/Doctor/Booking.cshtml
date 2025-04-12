@@ -109,6 +109,12 @@
 </head>
 <body>
     <div class="container">
+        <div class="row">
+            <div class="col-sm-10"></div>
+            <div class="col-sm-2">
+                <button type="button" class="btn btn-success" onclick="location.href='@Url.Action("DoctorAppointments", "Doctor", new { id = Model.DoctorID })'">View Appointments</button>
+            </div>
+        </div>
         <div class="row justify-content-center">
             <div class="col-sm-2"></div>
             <div class="col-sm-8">

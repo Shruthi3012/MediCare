@@ -1,4 +1,6 @@
-﻿namespace MediCare.ViewModel
+﻿using MediCare.Models;
+
+namespace MediCare.ViewModel
 {
     public class DoctorDetailsViewModel
     {
@@ -17,5 +19,6 @@
 
         public string Status { get; set; }
         public string AppointmentDescription { get; set; } 
+
     }
 }
