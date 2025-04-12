@@ -41,10 +41,71 @@
                     <td>@Model[i].BookedDate</td>
                     <td>@Model[i].BookedTime</td>
                     <td>
-                        <button type="button" class="btn btn-success">Rate</button>
+                        <button type="button" class="btn btn-success" onclick="openReviewModal('@Model[i].DoctorId')">Rate</button>
+
                     </td>
                 </tr>
             }
         </tbody>
     </table>
+    <!-- Review Modal -->
+    <div class="modal fade" id="reviewModal" tabindex="-1" aria-labelledby="reviewModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form id="reviewForm">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="reviewModalLabel">Rate Doctor</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" id="doctorId" name="doctorId" />
+                        <div class="mb-3">
+                            <label for="rating" class="form-label">Rating (1-5)</label>
+                            <input type="number" min="1" max="5" class="form-control" id="rating" required />
+                        </div>
+                        <div class="mb-3">
+                            <label for="comments" class="form-label">Comments</label>
+                            <textarea class="form-control" id="comments" rows="3" required></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">Submit Review</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script>
+    function openReviewModal(doctorId) {
+        $('#doctorId').val(doctorId);
+        var reviewModal = new bootstrap.Modal(document.getElementById('reviewModal'));
+        reviewModal.show();
+    }
+
+    $('#reviewForm').on('submit', function (e) {
+        e.preventDefault();
+
+        var reviewData = {
+            doctorId: $('#doctorId').val(),
+            patientId: "dummy-patient-id", // Replace this!
+            rating: parseInt($('#rating').val()),
+            comments: $('#comments').val()
+        };
+
+        $.ajax({
+            type: "POST",
+            url: "/Doctor/SubmitReview",
+            contentType: "application/json",
+            data: JSON.stringify(reviewData),
+            success: function (response) {
+                alert("Review submitted successfully!");
+                $('#reviewModal').modal('hide');
+            },
+            error: function () {
+                alert("Error submitting review.");
+            }
+        });
+    });
+</script>
+
 </body>

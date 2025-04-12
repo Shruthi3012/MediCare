@@ -10,10 +10,13 @@ namespace MediCare.Controllers
     {
 
         private readonly MongoDbContext _dbcontext;
+        private readonly IMongoCollection<Review> _reviewCollection;
+
 
         public DoctorController(MongoDbContext dbcontext)
         {
             _dbcontext = dbcontext;
+            _reviewCollection = dbcontext.Reviews;
         }
 
         public IActionResult Index()
@@ -150,5 +153,22 @@ namespace MediCare.Controllers
             // AddAvailabitySlots(newDoctor);
             return RedirectToAction("DoctorPage");
         }
+        [HttpPost]
+        public async Task<IActionResult> SubmitReview([FromBody] Review review)
+        {
+            review.UpdatedDate = DateTime.Now;
+            await _reviewCollection.InsertOneAsync(review);
+            return Ok(new { success = true });
+        }
+        [HttpGet]
+        public async Task<IActionResult> GetDoctorReviews(string doctorId)
+        {
+            if (string.IsNullOrEmpty(doctorId))
+                return BadRequest("Doctor ID is required");
+
+            var reviews = await _reviewCollection.Find(r => r.DoctorId == doctorId).ToListAsync();
+            return Json(reviews);
+        }
+
     }
 }
