@@ -20,5 +20,7 @@ namespace MediCare.ViewModel
         public string Status { get; set; }
         public string AppointmentDescription { get; set; } 
 
+        public List<Appointment> Appointments { get; set; }
+
     }
 }

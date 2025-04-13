@@ -38,6 +38,7 @@ namespace MediCare.Controllers
             {
                 return NotFound();
             }
+            List<Appointment> appointmentsLst = await _dbcontext.Appointments.Find(s => s.DoctorId == id).ToListAsync();
             DoctorDetailsViewModel doctorDetailsViewModel = new DoctorDetailsViewModel();
             doctorDetailsViewModel.StartTime = doctor.StartTime.ToString()  ;
             doctorDetailsViewModel.EndTime = doctor.EndTime.ToString();
@@ -47,6 +48,8 @@ namespace MediCare.Controllers
             var specialization = await _dbcontext.Specializations.Find(s => s.ObjectId == doctor.SpecializationId).FirstOrDefaultAsync();
             doctorDetailsViewModel.Specialization = specialization != null ? specialization.SpecializationName : "Unknown";
             doctorDetailsViewModel.DoctorID = doctor.ObjectId;
+            doctorDetailsViewModel.Appointments = appointmentsLst;
+           
             return View(doctorDetailsViewModel);
         
         }

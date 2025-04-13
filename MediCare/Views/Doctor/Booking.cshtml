@@ -13,6 +13,14 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <style>
+        .day-cell.past-date {
+            color: #ccc;
+            text-decoration: line-through;
+            cursor: not-allowed;
+            background-color: #f9f9f9;
+            opacity: 0.7;
+            pointer-events: none;
+        }
         .calendar-container {
             border: 1px solid #ddd;
             border-radius: 5px;
@@ -104,6 +112,18 @@
         .booking-btn {
             margin-top: 20px;
         }
+
+        .time-slot.booked {
+            background-color: #f0f0f0;
+            color: #aaa;
+            cursor: not-allowed;
+            text-decoration: line-through;
+            opacity: 0.7;
+        }
+
+            .time-slot.booked:hover {
+                background-color: #f0f0f0;
+            }
     </style>
 
 </head>
@@ -195,6 +215,58 @@
     </div>
     <br /><br />
     <script>
+
+        var bookedAppointments = [
+        @if (Model.Appointments != null)
+        {
+            foreach (var appointment in Model.Appointments)
+            {
+                @:{ date: "@appointment.BookedDate", time: "@appointment.BookedTime" },
+            }
+        }
+                ];
+
+        console.log(bookedAppointments);
+        function isTimeSlotBooked(date, timeSlot) {
+            // Format the date in YYYY-MM-DD format for standard comparison
+            const year = date.getFullYear();
+            const month = date.getMonth() + 1;
+            const day = date.getDate();
+            const formattedDateYMD = year + '-' +
+                (month < 10 ? '0' : '') + month + '-' +
+                (day < 10 ? '0' : '') + day;
+
+            // Also create the date in DD-MM-YYYY format to match what's in the array
+            const formattedDateDMY =
+                (day < 10 ? '0' : '') + day + '-' +
+                (month < 10 ? '0' : '') + month + '-' +
+                year;
+
+            console.log("Checking if booked:", formattedDateYMD, "or", formattedDateDMY, timeSlot);
+
+            // Check if this date and time combination exists in bookedAppointments
+            const isBooked = bookedAppointments.some(appointment => {
+                // Get the date and time from the appointment
+                const appDate = appointment.date ? appointment.date.trim() : '';
+                const appTime = appointment.time ? appointment.time.trim() : '';
+
+                console.log("Comparing with:", appDate, appTime);
+
+                // Check if the date matches either format
+                const dateMatches = (appDate === formattedDateYMD || appDate === formattedDateDMY);
+
+                // Check if the time matches
+                const timeMatches = appTime === timeSlot;
+
+                console.log(`Date match: ${dateMatches}, Time match: ${timeMatches}`);
+
+                return dateMatches && timeMatches;
+            });
+
+            console.log("Slot is booked:", isBooked);
+            return isBooked;
+        }
+
         document.addEventListener('DOMContentLoaded', function () {
             // Initialize variables
             let currentDate = new Date();
@@ -255,6 +327,10 @@
                 const prevLastDay = new Date(year, month, 0);
                 const prevDays = prevLastDay.getDate();
 
+                // Get current date for comparison
+                const today = new Date();
+                today.setHours(0, 0, 0, 0); // Reset time part for proper date comparison
+
                 // Create cells for days from previous month
                 for (let i = startingDay - 1; i > 0; i--) {
                     const dayCell = document.createElement('div');
@@ -264,15 +340,48 @@
                 }
 
                 // Create cells for days in current month
-                const today = new Date();
                 for (let i = 1; i <= totalDays; i++) {
                     const dayCell = document.createElement('div');
                     dayCell.className = 'day-cell';
                     dayCell.textContent = i;
 
+                    // Create a date object for this cell's date
+                    const cellDate = new Date(year, month, i);
+                    cellDate.setHours(0, 0, 0, 0); // Reset time part for proper comparison
+
                     // Check if this day is today
                     if (year === today.getFullYear() && month === today.getMonth() && i === today.getDate()) {
                         dayCell.classList.add('today');
+                    }
+
+                    // Check if this day is in the past
+                    if (cellDate < today) {
+                        dayCell.classList.add('inactive');
+                        dayCell.classList.add('past-date');
+                        // Optional: add additional styling for past dates
+                        dayCell.style.color = '#ccc';
+                        dayCell.style.textDecoration = 'line-through';
+                        dayCell.style.cursor = 'not-allowed';
+                    } else {
+                        // Only add click event to dates not in the past
+                        dayCell.addEventListener('click', function () {
+                            // Remove selected class from previously selected date
+                            document.querySelectorAll('.day-cell').forEach(cell => {
+                                cell.classList.remove('selected');
+                            });
+
+                            // Add selected class to this date
+                            this.classList.add('selected');
+
+                            // Set selected date
+                            selectedDate = new Date(year, month, i);
+
+                            // Generate time slots for this date
+                            generateTimeSlots(selectedDate);
+
+                            // Show available slots section
+                            document.getElementById('availableSlotsSection').style.display = 'block';
+                        });
                     }
 
                     // Check if this day is selected
@@ -280,26 +389,6 @@
                         month === selectedDate.getMonth() && i === selectedDate.getDate()) {
                         dayCell.classList.add('selected');
                     }
-
-                    // Add click event to select date
-                    dayCell.addEventListener('click', function () {
-                        // Remove selected class from previously selected date
-                        document.querySelectorAll('.day-cell').forEach(cell => {
-                            cell.classList.remove('selected');
-                        });
-
-                        // Add selected class to this date
-                        this.classList.add('selected');
-
-                        // Set selected date
-                        selectedDate = new Date(year, month, i);
-
-                        // Generate time slots for this date
-                        generateTimeSlots(selectedDate);
-
-                        // Show available slots section
-                        document.getElementById('availableSlotsSection').style.display = 'block';
-                    });
 
                     calendarDays.appendChild(dayCell);
                 }
@@ -326,12 +415,12 @@
                 const startMinutes = startTime.hours * 60 + startTime.minutes;
                 const endMinutes = endTime.hours * 60 + endTime.minutes;
 
-                // Generate slots at 30-minute intervals
+                // Generate slots at 15-minute intervals
                 for (let minutes = startMinutes; minutes < endMinutes; minutes += 15) {
                     const hours = Math.floor(minutes / 60);
                     const mins = minutes % 60;
 
-                    // Format the time
+                    // Format the time in 24-hour format for internal use/comparison
                     const formattedTime =
                         (hours < 10 ? '0' : '') + hours + ':' +
                         (mins < 10 ? '0' : '') + mins;
@@ -339,31 +428,41 @@
                     // Create the time slot element
                     const timeSlot = document.createElement('div');
                     timeSlot.className = 'time-slot';
-                    timeSlot.textContent = formattedTime;
+
+                    // Store the 24-hour format as a data attribute for reference
+                    timeSlot.dataset.time24 = formattedTime;
 
                     // Convert 24-hour format to 12-hour format for display
                     const displayHours = hours % 12 || 12;
                     const amPm = hours < 12 ? 'AM' : 'PM';
                     timeSlot.textContent = displayHours + ':' + (mins < 10 ? '0' : '') + mins + ' ' + amPm;
 
-                    // Add click event to select time slot
-                    timeSlot.addEventListener('click', function () {
-                        // Remove selected class from previously selected time slot
-                        document.querySelectorAll('.time-slot').forEach(slot => {
-                            slot.classList.remove('selected');
+                    // Check if this time slot is already booked
+                    const isBooked = isTimeSlotBooked(date, formattedTime);
+
+                    if (isBooked) {
+                        timeSlot.classList.add('booked');
+                        // Log booked slots for debugging
+                        console.log(`Slot ${formattedTime} is marked as booked`);
+                    } else {
+                        // Add click event to select time slot (only for available slots)
+                        timeSlot.addEventListener('click', function () {
+                            // Remove selected class from previously selected time slot
+                            document.querySelectorAll('.time-slot').forEach(slot => {
+                                slot.classList.remove('selected');
+                            });
+
+                            // Add selected class to this time slot
+                            this.classList.add('selected');
+
+                            // Set selected time slot
+                            selectedTimeSlot = formattedTime;
                         });
-
-                        // Add selected class to this time slot
-                        this.classList.add('selected');
-
-                        // Set selected time slot
-                        selectedTimeSlot = formattedTime;
-                    });
+                    }
 
                     timeSlots.appendChild(timeSlot);
                 }
             }
-
             // Add Book Appointment functionality
             document.getElementById('bookAppointment').addEventListener('click', async function () {
                 if (!selectedDate || !selectedTimeSlot) {
