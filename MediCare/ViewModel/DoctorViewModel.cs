@@ -13,6 +13,9 @@ namespace MediCare.ViewModel
         public string EndTime { get; set; }
         public string Degree { get; set; }
 
+        public string Description { get; set; }
+
+        public string DoctorImage { get; set; }
         public List<DoctorInfo> DoctorInfos { get; set; }
 
     }
@@ -27,7 +30,7 @@ namespace MediCare.ViewModel
         public string StartTime { get; set; }
         public string EndTime { get; set; }
         public string Degree { get; set; }
-
+        public string Description { get; set; }
         public List<DateTime> bookedAppointments { get; set; }
     }
 

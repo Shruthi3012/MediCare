@@ -3,6 +3,11 @@ using MediCare.Models;
 using MediCare.ViewModel;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
+using static System.Net.Mime.MediaTypeNames;
+using System.Drawing.Imaging;
+using System.Drawing;
+using SixLabors.ImageSharp;
+
 
 namespace MediCare.Controllers
 {
@@ -11,13 +16,18 @@ namespace MediCare.Controllers
 
         private readonly MongoDbContext _dbcontext;
         private readonly IMongoCollection<Review> _reviewCollection;
+        private readonly IWebHostEnvironment _webHostEnvironment;
 
-
-        public DoctorController(MongoDbContext dbcontext)
+        public DoctorController(MongoDbContext dbcontext, IWebHostEnvironment webHostEnvironment)
         {
             _dbcontext = dbcontext;
             _reviewCollection = dbcontext.Reviews;
+            _webHostEnvironment = webHostEnvironment;
         }
+
+       
+
+       
 
         public IActionResult Index()
         {
@@ -45,10 +55,12 @@ namespace MediCare.Controllers
             doctorDetailsViewModel.Degree = doctor.Degree.ToString() ;
             doctorDetailsViewModel.Email = doctor.Email.ToString() ;
             doctorDetailsViewModel.Name = doctor.Name.ToString() ;
+            doctorDetailsViewModel.DoctorDesc = doctor.Description;
             var specialization = await _dbcontext.Specializations.Find(s => s.ObjectId == doctor.SpecializationId).FirstOrDefaultAsync();
             doctorDetailsViewModel.Specialization = specialization != null ? specialization.SpecializationName : "Unknown";
             doctorDetailsViewModel.DoctorID = doctor.ObjectId;
             doctorDetailsViewModel.Appointments = appointmentsLst;
+            doctorDetailsViewModel.DoctorImage = doctor.DoctorImage;
            
             return View(doctorDetailsViewModel);
         
@@ -117,6 +129,7 @@ namespace MediCare.Controllers
                 doctorInfo.Degree = doctor.Degree;
                 doctorInfo.StartTime = doctor.StartTime.ToString(); 
                 doctorInfo.EndTime = doctor.EndTime.ToString();
+                doctorInfo.Description = doctor.Description;    
                 var specialization = await _dbcontext.Specializations.Find(s => s.ObjectId == doctor.SpecializationId).FirstOrDefaultAsync();
                 doctorInfo.Specialization = specialization != null ? specialization.SpecializationName : "Unknown";
                 doctorViewModel.DoctorInfos.Add(doctorInfo);
@@ -133,6 +146,8 @@ namespace MediCare.Controllers
             newDoctor.Age = doctorViewModel.Age;
             newDoctor.Email = doctorViewModel.Email;
             newDoctor.Degree = doctorViewModel.Degree;
+            newDoctor.Description = doctorViewModel.Description;
+            newDoctor.DoctorImage = SaveFileFromBase64(doctorViewModel.DoctorImage, _webHostEnvironment);
             if (TimeOnly.TryParse(doctorViewModel.StartTime, out TimeOnly startTime))
                 newDoctor.StartTime = startTime;
 
@@ -195,6 +210,54 @@ namespace MediCare.Controllers
 
             var reviews = await _reviewCollection.Find(r => r.DoctorId == doctorId).ToListAsync();
             return Json(reviews);
+        }
+
+
+        private string SaveFileFromBase64(string base64String, IWebHostEnvironment webHostEnvironment)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(base64String) || !base64String.Contains(","))
+                    return null;
+
+                // Extract the base64 data part
+                byte[] fileBytes = Convert.FromBase64String(base64String.Split(',')[1]);
+
+                // Generate a unique filename
+                string fileName = $"{Guid.NewGuid()}.jpg";
+
+                // Use web root path instead of AppDomain.CurrentDomain.BaseDirectory
+                string directoryPath = Path.Combine(webHostEnvironment.WebRootPath, "Images", "Doctor");
+
+                // Create directory if it doesn't exist
+                if (!Directory.Exists(directoryPath))
+                {
+                    Directory.CreateDirectory(directoryPath);
+                }
+
+                string filePath = Path.Combine(directoryPath, fileName);
+
+                // Using SixLabors.ImageSharp
+                using (var image = SixLabors.ImageSharp.Image.Load<SixLabors.ImageSharp.PixelFormats.Rgba32>(fileBytes))
+                {
+                    // Set jpg encoding options with quality
+                    var encoder = new SixLabors.ImageSharp.Formats.Jpeg.JpegEncoder
+                    {
+                        Quality = 50 // 50% quality compression
+                    };
+
+                    // Save the image - using the correct overload
+                    image.Save(filePath, encoder);
+                }
+
+                // Return the relative URL path for the saved image
+                return $"/Images/Doctor/{fileName}";
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error saving image: {ex.Message}");
+                return null;
+            }
         }
 
     }

@@ -10,9 +10,10 @@ namespace MediCare.ViewModel
         public string StartTime { get; set; }
         public string EndTime { get; set; }
         public string Degree { get; set; }
-
+        public string DoctorDesc { get; set; }
 
         public string DoctorID { get; set; }
+        public string DoctorImage { get; set; }
 
         public string Bookedtime { get; set; }
         public string BookedDate { get; set; }

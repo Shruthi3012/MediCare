@@ -34,6 +34,10 @@ namespace MediCare.Models
         [BsonElement("Description")]
         public string Description { get; set; }
 
+
+        [BsonElement("DoctorImage")]
+        public string DoctorImage { get; set; }
+
         
     }
 

@@ -20,7 +20,54 @@
 
 
 
-    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#exampleModal">Add Doctor</button>
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-10"></div>
+            <div class="col-sm-2">
+                <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#exampleModal">Add Doctor</button>
+            </div>
+        </div>
+        <div class="row justify-content-center">
+            <div class="col-sm-1"></div>
+            <div class="col-sm-10">
+
+                <table class="table stripped shadow-sm p-3 mb-5 bg-white rounded">
+                        <thead>
+                            <tr>
+                                <th scope="col">S.No</th>
+                                <th scope="col">Name</th>
+                                <th scope="col">Specialization</th>
+                                <th scope="col">Availability</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (int i = 0; i < Model.DoctorInfos.Count; i++)
+                            {
+                                <tr>
+                                    <td>@(i + 1)</td>
+                                    <td>@Model.DoctorInfos[i].Name</td>
+                                    <td>@Model.DoctorInfos[i].Specialization</td>
+                                    <td>
+                                        <button type="button" class="btn btn-success" onclick="location.href='@Url.Action("Booking", "Doctor", new { id = Model.DoctorInfos[i].ObjectId })'">View</button>
+
+                                      
+
+                                    </td>
+                                   
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                
+
+            </div>
+            <div class="col-sm-1"></div>
+        </div>
+    </div>
+
+
+
+   
 
     <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="DoctorModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -68,6 +115,23 @@
                             <label for="endTime" class="col-form-label">End Time</label>
                             <input type="time" class="form-control" id="endTime">
                         </div>
+                        <div class="mb-3">
+                            <label for="docDescription" class="col-form-label">Description</label>
+                            <textarea class="form-control " style="min-height:80px;" id="docDescription" rows="3" placeholder=""></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="doctorPhoto">Photo</label>
+                            <div class="custom-file-container">
+                                <input type="file" accept="image/*" class="d-none" id="doctorPhoto">
+                                <!-- Camera Icon Button -->
+                                <button type="button" class="btn btn-light" id="cameraBtn">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-camera" viewBox="0 0 16 16">
+                                        <path d="M15 12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h1.172a3 3 0 0 0 2.12-.879l.83-.828A1 1 0 0 1 6.827 3h2.344a1 1 0 0 1 .707.293l.828.828A3 3 0 0 0 12.828 5H14a1 1 0 0 1 1 1zM2 4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-1.172a2 2 0 0 1-1.414-.586l-.828-.828A2 2 0 0 0 9.172 2H6.828a2 2 0 0 0-1.414.586l-.828.828A2 2 0 0 1 3.172 4z" />
+                                        <path d="M8 11a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5m0 1a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7M3 6.5a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
                     </form>
 
                 </div>
@@ -78,44 +142,9 @@
             </div>
         </div>
     </div>
-
     
-    <table class="table">
-        <thead>
-            <tr>
-                <th scope="col">S.No</th>
-                <th scope="col">Name</th>
-                <th scope="col">Specialization</th>
-                <th scope="col">Availability</th>
-            </tr>
-        </thead>
-        <tbody>
-            @for (int i = 0; i < Model.DoctorInfos.Count; i++)
-            {
-                <tr>
-                    <td>@(i + 1)</td>
-                    <td>@Model.DoctorInfos[i].Name</td>
-                    <td>@Model.DoctorInfos[i].Specialization</td>
-                    <td>
-                        <button type="button" class="btn btn-success" onclick="location.href='@Url.Action("Booking", "Doctor", new { id = Model.DoctorInfos[i].ObjectId })'">View</button>
-
-                         @*  <button > 
-                        <a asp-controller="Doctor" asp-action="Booking" asp-route-id="@Model.DoctorInfos[i].ObjectId" class="btn btn-success">View</a>
-                        </button> *@ 
-@* 
-                        <button type="button" class="btn btn-success"  @* data-bs-toggle="modal" data-bs-target="#docappointmentModal" >View</button> *@
-                       @*  <input type="date" id="datePicker" class="form-control my-3" style="display:none; max-width: 300px;"> *@
-                       
-
-                    </td>
-                   @*  <td>
-                        <button class="btn btn-danger" onclick="deleteSpecialization('@Model[i].ObjectId')">Delete</button>
-                    </td> *@
-                </tr>
-            }
-        </tbody>
-    </table>
-
+    
+    
 
 
    
@@ -126,9 +155,11 @@
 
 <script>
 
-    
-   
 
+
+    document.getElementById('cameraBtn').addEventListener('click', function () {
+        document.getElementById('doctorPhoto').click(); 
+    });
 
     async function AddNewDoctor() {
         const DocName = document.getElementById("docName").value;
@@ -142,6 +173,14 @@
         const DocDegree = document.getElementById("docDegree").value;
         const DocStartTime = document.getElementById("startTime").value;
         const DocEndTime = document.getElementById("endTime").value;
+        const docDesc = document.getElementById("docDescription").value;
+        const docImage = document.getElementById('doctorPhoto');
+        const docPhotoFile = docImage.files[0];
+
+        const docPhotoBase64 = docPhotoFile ? await fileToBase64(docPhotoFile) : null;
+       
+       
+
 
         console.log(DocEndTime);
 
@@ -152,7 +191,9 @@
             Specialization: DocSpecId,
             StartTime: DocStartTime,
             EndTime: DocEndTime,
-            Degree: DocDegree
+            Degree: DocDegree,
+            Description: docDesc,
+            DoctorImage: docPhotoBase64
         };
 
         try {
@@ -180,7 +221,14 @@
         }
     }
 
-
+    function fileToBase64(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = error => reject(error);
+            reader.readAsDataURL(file);
+        });
+    }
 
 
   
