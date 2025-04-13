@@ -73,7 +73,7 @@ namespace MediCare.Controllers
                 return NotFound();
             }
             var specialization = await _dbcontext.Specializations.Find(s => s.ObjectId == doctor.SpecializationId).FirstOrDefaultAsync();
-            
+           
             List<AppointmentsViewModel> appointmentsViewModelList = new List<AppointmentsViewModel>();
             foreach (Appointment appointment in appointmentsLst)
             {
@@ -84,7 +84,13 @@ namespace MediCare.Controllers
                 appointmentsViewModel.BookedTime = appointment.BookedTime.ToString();
                 appointmentsViewModel.BookedDate = appointment.BookedDate.ToString();
                 appointmentsViewModel.Specialization = specialization != null ? specialization.SpecializationName : "Unknown";
-                appointmentsViewModelList.Add(appointmentsViewModel);
+               if(appointment.PatientId != null)
+                {
+                    var patient = await _dbcontext.Patients.Find(s => s.ObjectId == appointment.PatientId).FirstOrDefaultAsync();
+                    appointmentsViewModel.PatientName = patient.Name;
+                }
+               
+               appointmentsViewModelList.Add(appointmentsViewModel);
             }
             
             return View(appointmentsViewModelList);
@@ -152,6 +158,24 @@ namespace MediCare.Controllers
                 newAppointment.BookedTime = bookedTime;
             if (DateOnly.TryParse(doctorDetailsViewModel.BookedDate, out DateOnly bookedDate))
                 newAppointment.BookedDate = bookedDate;
+            newAppointment.Description = doctorDetailsViewModel.AppointmentDescription;
+            Patient patient = await _dbcontext.Patients.Find(s => s.Name == doctorDetailsViewModel.PatientName 
+            && s.Email == doctorDetailsViewModel.Email
+            && s.Phone == doctorDetailsViewModel.PatientPhone ).FirstOrDefaultAsync();
+            if (patient != null)
+            {
+              newAppointment.PatientId = patient.ObjectId;
+            }
+            else
+            {
+                Patient newPatient = new Patient();
+                newPatient.Email = doctorDetailsViewModel.PatientEmail;
+                newPatient.Age = doctorDetailsViewModel.PatientAge;
+                newPatient.Phone = doctorDetailsViewModel.PatientPhone; 
+                newPatient.Name = doctorDetailsViewModel.PatientName;
+                await _dbcontext.Patients.InsertOneAsync(newPatient);
+                newAppointment.PatientId = newPatient.ObjectId;
+            }
             await _dbcontext.Appointments.InsertOneAsync(newAppointment);
             // AddAvailabitySlots(newDoctor);
             return RedirectToAction("DoctorPage");

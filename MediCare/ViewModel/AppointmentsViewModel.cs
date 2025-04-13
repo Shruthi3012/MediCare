@@ -20,7 +20,7 @@ namespace MediCare.ViewModel
 
         public string Description { get; set; }
 
-       
+       public string PatientName { get; set; }
 
     }
 }

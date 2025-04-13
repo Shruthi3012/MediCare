@@ -22,5 +22,11 @@ namespace MediCare.ViewModel
 
         public List<Appointment> Appointments { get; set; }
 
+        public string PatientName { get; set; }
+        public string PatientEmail { get; set; }
+        public string PatientPhone { get; set; }
+        public int PatientAge { get; set; }
+
+
     }
 }

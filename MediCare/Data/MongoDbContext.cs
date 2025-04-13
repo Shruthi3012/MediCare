@@ -23,6 +23,7 @@ namespace MediCare.Data
         public IMongoCollection<Doctor> Doctors => _database.GetCollection<Doctor>("Doctors");
         public IMongoCollection<Appointment> Appointments => _database.GetCollection<Appointment>("Appointments");
         public IMongoCollection<Review> Reviews => _database.GetCollection<Review>("Reviews");
+        public IMongoCollection<Patient> Patients => _database.GetCollection<Patient>("Patients");
 
     }
 }

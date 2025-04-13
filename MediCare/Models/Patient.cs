@@ -15,6 +15,9 @@ namespace MediCare.Models
         [BsonElement("Email")]
         public string Email { get; set; }
 
+        [BsonElement("Phone")]
+        public string Phone { get; set; }
+
         [BsonElement("Age")]
         public int Age { get; set; }
 
