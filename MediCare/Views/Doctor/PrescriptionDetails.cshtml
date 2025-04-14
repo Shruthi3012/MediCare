@@ -1,0 +1,126 @@
+﻿@model MediCare.ViewModel.PrescriptionDetailsViewModel
+
+
+<h3>Doctor Information</h3>
+<p><strong>Name:</strong> @Model.DoctorName</p>
+<p><strong>Specialization:</strong> @Model.Specialization</p>
+<p><strong>Degree:</strong> @Model.Degree</p>
+
+<h3>Patient Information</h3>
+<p><strong>Name:</strong> @Model.PatientName</p>
+<p><strong>Age:</strong> @Model.Age</p>
+<p><strong>Email:</strong> @Model.Email</p>
+
+<h3>Appointment Details</h3>
+<p><strong>Appointment Date:</strong> @Model.BookedDate</p>
+<p><strong>Appointment Time:</strong> @Model.BookedTime</p>
+<p><strong>Patient Description:</strong> @Model.Description</p>
+
+
+@*<h3>Prescription Details</h3>
+
+@if ((Model.Medicines != null && Model.Medicines.Count > 0) || (Model.Tests != null && Model.Tests.Count > 0))
+{
+    @if (Model.Medicines != null && Model.Medicines.Count > 0)
+    {
+        <p><strong>Medicines:</strong></p>
+        <ul>
+            @foreach (var medicine in Model.Medicines)
+            {
+                <li>@medicine</li>
+            }
+        </ul>
+    }
+
+    @if (Model.Tests != null && Model.Tests.Count > 0)
+    {
+        <p><strong>Tests:</strong></p>
+        <ul>
+            @foreach (var test in Model.Tests)
+            {
+                <li>@test</li>
+            }
+        </ul>
+    }
+
+    <p><strong>Need Revisit:</strong> @(Model.NeedRevisit ? "Yes" : "No")</p>
+    <p><strong>Prescription Date:</strong> @Model.PrescriptionDate.ToString("yyyy-MM-dd")</p>
+
+    <button class="btn btn-sm btn-warning" onclick="openEditModal()">
+        <i class="bi bi-pencil"></i> Edit
+    </button>
+}
+else
+{
+    <p><em>No prescription added yet.</em></p>
+    <button class="btn btn-primary" onclick="openEditModal()">Add Prescription</button>
+}
+
+<!-- Prescription Modal -->
+<div class="modal fade" id="prescriptionModal" tabindex="-1" aria-labelledby="prescriptionModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="prescriptionForm">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="prescriptionModalLabel">Prescription</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="doctorId" name="doctorId" value="@Model.DoctorId" />
+                    <input type="hidden" id="patientId" name="patientId" value="@Model.PatientId" />
+
+                    <div class="mb-3">
+                        <label for="medicines" class="form-label">Medicines</label>
+                        <textarea class="form-control" id="medicines" name="medicines" rows="2">@string.Join(", ", Model.Medicines)</textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="tests" class="form-label">Tests</label>
+                        <textarea class="form-control" id="tests" name="tests" rows="2">@string.Join(", ", Model.Tests)</textarea>
+                    </div>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="needRevisit" name="needRevisit" @(Model.NeedRevisit ? "checked" : "") />
+                        <label class="form-check-label" for="needRevisit">Need Revisit?</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Save Prescription</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div> *@
+
+@section Scripts {
+    <script>
+        function openEditModal() {
+            var prescriptionModal = new bootstrap.Modal(document.getElementById('prescriptionModal'));
+            prescriptionModal.show();
+        }
+
+        $('#prescriptionForm').submit(function (e) {
+            e.preventDefault();
+
+            const formData = {
+                doctorId: $('#doctorId').val(),
+                patientId: $('#patientId').val(),
+                medicines: $('#medicines').val().split(',').map(m => m.trim()), 
+                tests: $('#tests').val().split(',').map(t => t.trim()), 
+                needRevisit: $('#needRevisit').is(':checked')
+            };
+
+            $.ajax({
+                url: '/Doctor/SavePrescription',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(formData),
+                success: function () {
+                    alert('Prescription saved successfully!');
+                    location.reload();
+                },
+                error: function () {
+                    alert('Error saving prescription.');
+                }
+            });
+        });
+    </script>
+}

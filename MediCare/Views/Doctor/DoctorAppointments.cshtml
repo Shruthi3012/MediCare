@@ -41,8 +41,9 @@
                     <td>@Model[i].BookedDate</td>
                     <td>@Model[i].BookedTime</td>
                     <td>
-                        <button type="button" class="btn btn-success" onclick="openReviewModal('@Model[i].DoctorId')">Rate</button>
-
+                        <button type="button" class="btn btn-success" onclick="openReviewModal('@Model[i].DoctorId', '@Model[i].PatientId')">Rate</button>
+                        <button type="button" class="btn btn-success" onclick="location.href='@Url.Action("PrescriptionDetails", "Doctor", new { doctorId = Model[i].DoctorId, patientId = Model[i].PatientId, appointmentId = Model[i].AppId })'"> View</button>
+ 
                     </td>
                 </tr>
             }
@@ -59,6 +60,8 @@
                     </div>
                     <div class="modal-body">
                         <input type="hidden" id="doctorId" name="doctorId" />
+                        <input type="hidden" id="patientId" name="patientId" /> 
+
                         <div class="mb-3">
                             <label for="rating" class="form-label">Rating (1-5)</label>
                             <input type="number" min="1" max="5" class="form-control" id="rating" required />
@@ -78,6 +81,7 @@
     <script>
     function openReviewModal(doctorId) {
         $('#doctorId').val(doctorId);
+        $('#patientId').val(patientId);
         var reviewModal = new bootstrap.Modal(document.getElementById('reviewModal'));
         reviewModal.show();
     }
@@ -87,7 +91,7 @@
 
         var reviewData = {
             doctorId: $('#doctorId').val(),
-            patientId: "dummy-patient-id", // Replace this!
+            patientId: $('#patientId').val(),
             rating: parseInt($('#rating').val()),
             comments: $('#comments').val()
         };

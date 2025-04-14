@@ -5,6 +5,8 @@ namespace MediCare.ViewModel
 {
     public class AppointmentsViewModel
     {
+        internal static string doctorId;
+
         public string AppId { get; set; }
         public string DoctorId { get; set; }
 
@@ -20,7 +22,8 @@ namespace MediCare.ViewModel
 
         public string Description { get; set; }
 
-       public string PatientName { get; set; }
+        public string PatientName { get; set; }
+        public string PatientId { get; set; }
 
     }
 }

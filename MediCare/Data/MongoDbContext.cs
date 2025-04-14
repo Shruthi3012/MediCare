@@ -24,6 +24,7 @@ namespace MediCare.Data
         public IMongoCollection<Appointment> Appointments => _database.GetCollection<Appointment>("Appointments");
         public IMongoCollection<Review> Reviews => _database.GetCollection<Review>("Reviews");
         public IMongoCollection<Patient> Patients => _database.GetCollection<Patient>("Patients");
+        public IMongoCollection<Prescription> Prescriptions => _database.GetCollection<Prescription>("Prescriptions");
 
     }
 }

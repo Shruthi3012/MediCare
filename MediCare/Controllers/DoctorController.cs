@@ -7,6 +7,7 @@ using static System.Net.Mime.MediaTypeNames;
 using System.Drawing.Imaging;
 using System.Drawing;
 using SixLabors.ImageSharp;
+using MongoDB.Bson;
 
 
 namespace MediCare.Controllers
@@ -17,6 +18,9 @@ namespace MediCare.Controllers
         private readonly MongoDbContext _dbcontext;
         private readonly IMongoCollection<Review> _reviewCollection;
         private readonly IWebHostEnvironment _webHostEnvironment;
+       
+
+
 
         public DoctorController(MongoDbContext dbcontext, IWebHostEnvironment webHostEnvironment)
         {
@@ -25,9 +29,9 @@ namespace MediCare.Controllers
             _webHostEnvironment = webHostEnvironment;
         }
 
-       
 
-       
+
+
 
         public IActionResult Index()
         {
@@ -50,20 +54,20 @@ namespace MediCare.Controllers
             }
             List<Appointment> appointmentsLst = await _dbcontext.Appointments.Find(s => s.DoctorId == id).ToListAsync();
             DoctorDetailsViewModel doctorDetailsViewModel = new DoctorDetailsViewModel();
-            doctorDetailsViewModel.StartTime = doctor.StartTime.ToString()  ;
+            doctorDetailsViewModel.StartTime = doctor.StartTime.ToString();
             doctorDetailsViewModel.EndTime = doctor.EndTime.ToString();
-            doctorDetailsViewModel.Degree = doctor.Degree.ToString() ;
-            doctorDetailsViewModel.Email = doctor.Email.ToString() ;
-            doctorDetailsViewModel.Name = doctor.Name.ToString() ;
+            doctorDetailsViewModel.Degree = doctor.Degree.ToString();
+            doctorDetailsViewModel.Email = doctor.Email.ToString();
+            doctorDetailsViewModel.Name = doctor.Name.ToString();
             doctorDetailsViewModel.DoctorDesc = doctor.Description;
             var specialization = await _dbcontext.Specializations.Find(s => s.ObjectId == doctor.SpecializationId).FirstOrDefaultAsync();
             doctorDetailsViewModel.Specialization = specialization != null ? specialization.SpecializationName : "Unknown";
             doctorDetailsViewModel.DoctorID = doctor.ObjectId;
             doctorDetailsViewModel.Appointments = appointmentsLst;
             doctorDetailsViewModel.DoctorImage = doctor.DoctorImage;
-           
+
             return View(doctorDetailsViewModel);
-        
+
         }
 
 
@@ -75,7 +79,7 @@ namespace MediCare.Controllers
                 return NotFound();
             }
             List<Appointment> appointmentsLst = await _dbcontext.Appointments.Find(s => s.DoctorId == id).ToListAsync();
-            if(appointmentsLst == null)
+            if (appointmentsLst == null)
             {
                 return NotFound();
             }
@@ -85,7 +89,7 @@ namespace MediCare.Controllers
                 return NotFound();
             }
             var specialization = await _dbcontext.Specializations.Find(s => s.ObjectId == doctor.SpecializationId).FirstOrDefaultAsync();
-           
+
             List<AppointmentsViewModel> appointmentsViewModelList = new List<AppointmentsViewModel>();
             foreach (Appointment appointment in appointmentsLst)
             {
@@ -96,15 +100,16 @@ namespace MediCare.Controllers
                 appointmentsViewModel.BookedTime = appointment.BookedTime.ToString();
                 appointmentsViewModel.BookedDate = appointment.BookedDate.ToString();
                 appointmentsViewModel.Specialization = specialization != null ? specialization.SpecializationName : "Unknown";
-               if(appointment.PatientId != null)
+                if (appointment.PatientId != null)
                 {
                     var patient = await _dbcontext.Patients.Find(s => s.ObjectId == appointment.PatientId).FirstOrDefaultAsync();
                     appointmentsViewModel.PatientName = patient.Name;
+                    appointmentsViewModel.PatientId = patient.ObjectId;
                 }
-               
-               appointmentsViewModelList.Add(appointmentsViewModel);
+
+                appointmentsViewModelList.Add(appointmentsViewModel);
             }
-            
+
             return View(appointmentsViewModelList);
 
         }
@@ -119,17 +124,17 @@ namespace MediCare.Controllers
             List<Doctor> doctors = await _dbcontext.Doctors.Find(_ => true).ToListAsync();
             doctorViewModel.DoctorInfos = new List<DoctorInfo>();
             int i = 1;
-            foreach(Doctor doctor in doctors)
+            foreach (Doctor doctor in doctors)
             {
-              DoctorInfo doctorInfo = new DoctorInfo();
+                DoctorInfo doctorInfo = new DoctorInfo();
                 doctorInfo.ObjectId = doctor.ObjectId;
                 doctorInfo.Id = i++;
-              doctorInfo.Name = doctor.Name;
-                doctorInfo.Email    = doctor.Email;
+                doctorInfo.Name = doctor.Name;
+                doctorInfo.Email = doctor.Email;
                 doctorInfo.Degree = doctor.Degree;
-                doctorInfo.StartTime = doctor.StartTime.ToString(); 
+                doctorInfo.StartTime = doctor.StartTime.ToString();
                 doctorInfo.EndTime = doctor.EndTime.ToString();
-                doctorInfo.Description = doctor.Description;    
+                doctorInfo.Description = doctor.Description;
                 var specialization = await _dbcontext.Specializations.Find(s => s.ObjectId == doctor.SpecializationId).FirstOrDefaultAsync();
                 doctorInfo.Specialization = specialization != null ? specialization.SpecializationName : "Unknown";
                 doctorViewModel.DoctorInfos.Add(doctorInfo);
@@ -166,27 +171,27 @@ namespace MediCare.Controllers
         [HttpPost]
         public async Task<IActionResult> AddAppointment([FromBody] DoctorDetailsViewModel doctorDetailsViewModel)
         {
-            
-           Appointment newAppointment = new Appointment();
+
+            Appointment newAppointment = new Appointment();
             newAppointment.DoctorId = doctorDetailsViewModel.DoctorID;
             if (TimeOnly.TryParse(doctorDetailsViewModel.Bookedtime, out TimeOnly bookedTime))
                 newAppointment.BookedTime = bookedTime;
             if (DateOnly.TryParse(doctorDetailsViewModel.BookedDate, out DateOnly bookedDate))
                 newAppointment.BookedDate = bookedDate;
             newAppointment.Description = doctorDetailsViewModel.AppointmentDescription;
-            Patient patient = await _dbcontext.Patients.Find(s => s.Name == doctorDetailsViewModel.PatientName 
+            Patient patient = await _dbcontext.Patients.Find(s => s.Name == doctorDetailsViewModel.PatientName
             && s.Email == doctorDetailsViewModel.Email
-            && s.Phone == doctorDetailsViewModel.PatientPhone ).FirstOrDefaultAsync();
+            && s.Phone == doctorDetailsViewModel.PatientPhone).FirstOrDefaultAsync();
             if (patient != null)
             {
-              newAppointment.PatientId = patient.ObjectId;
+                newAppointment.PatientId = patient.ObjectId;
             }
             else
             {
                 Patient newPatient = new Patient();
                 newPatient.Email = doctorDetailsViewModel.PatientEmail;
                 newPatient.Age = doctorDetailsViewModel.PatientAge;
-                newPatient.Phone = doctorDetailsViewModel.PatientPhone; 
+                newPatient.Phone = doctorDetailsViewModel.PatientPhone;
                 newPatient.Name = doctorDetailsViewModel.PatientName;
                 await _dbcontext.Patients.InsertOneAsync(newPatient);
                 newAppointment.PatientId = newPatient.ObjectId;
@@ -260,5 +265,95 @@ namespace MediCare.Controllers
             }
         }
 
+        // GET action to show prescription details
+        [HttpGet]
+        public async Task<IActionResult> PrescriptionDetails(string doctorId, string patientId , string appointmentId)
+        {
+            if (string.IsNullOrEmpty(doctorId) || string.IsNullOrEmpty(patientId))
+            {
+                return BadRequest("Doctor ID and Patient ID are required.");
+            }
+
+            var doctor = await _dbcontext.Doctors.Find(d => d.ObjectId == doctorId).FirstOrDefaultAsync();
+            Patient patient = await _dbcontext.Patients.Find(p => p.ObjectId == patientId).FirstOrDefaultAsync();
+            var appointment = await _dbcontext.Appointments.Find(a => a.ObjectId == appointmentId ).FirstOrDefaultAsync();
+            //var prescription = await _prescriptionCollection
+            //    .Find(p => p.DoctorId == doctorId && p.PatientId == patientId)
+            //    .FirstOrDefaultAsync();
+            var specialization = await _dbcontext.Specializations.Find(s => s.ObjectId == doctor.SpecializationId).FirstOrDefaultAsync();
+
+            //if (doctor == null || patient == null || prescription == null)
+            //{
+            //    return NotFound("Doctor, Patient or Prescription not found.");
+            //}
+
+            var viewModel = new PrescriptionDetailsViewModel
+            {
+                DoctorId = doctor.ObjectId,
+                PatientId = patient.ObjectId,
+                DoctorName = doctor.Name,
+                Specialization = specialization?.SpecializationName ?? "Unknown",
+                Degree = doctor.Degree,
+                PatientName = patient.Name,
+                Age = patient.Age,
+                Email = patient.Email,
+                BookedTime = appointment.BookedTime.ToString(),
+                BookedDate = appointment.BookedDate.ToString(),
+                Description = appointment.Description,
+
+                //Medicines = prescription.Medicines?.Count > 0 ? prescription.Medicines : new List<string> { "N/A" },
+                // Tests = prescription.Tests?.Count > 0 ? prescription.Tests : new List<string> { "N/A" },
+                // NeedRevisit = prescription.NeedRevisit,
+                //PrescriptionDate = prescription.PrescriptionDate
+            };
+
+            return View(viewModel);
+        }
+        //[HttpPost]
+        //public async Task<IActionResult> SavePrescription([FromBody] PrescriptionDetailsViewModel prescriptionDetails)
+        //{
+        //    if (prescriptionDetails == null || string.IsNullOrEmpty(prescriptionDetails.DoctorId) || string.IsNullOrEmpty(prescriptionDetails.PatientId))
+        //    {
+        //        return BadRequest("Invalid data.");
+        //    }
+
+        //    // Find the existing prescription
+        //    var prescription = await _prescriptionCollection
+        //        .Find(p => p.DoctorId == prescriptionDetails.DoctorId && p.PatientId == prescriptionDetails.PatientId)
+        //        .FirstOrDefaultAsync();
+
+        //    // If no existing prescription, create a new one
+        //    if (prescription == null)
+        //    {
+        //        prescription = new Prescription
+        //        {
+        //            DoctorId = prescriptionDetails.DoctorId,
+        //            PatientId = prescriptionDetails.PatientId,
+        //            PrescriptionDate = DateTime.Now
+        //        };
+        //        await _prescriptionCollection.InsertOneAsync(prescription);
+        //    }
+
+        //    // Update the prescription with new data
+        //    prescription.Medicines = prescriptionDetails.Medicines;
+        //    prescription.Tests = prescriptionDetails.Tests;
+        //    prescription.NeedRevisit = prescriptionDetails.NeedRevisit;
+
+        //    var updateDefinition = Builders<Prescription>.Update
+        //        .Set(p => p.Medicines, prescription.Medicines)
+        //        .Set(p => p.Tests, prescription.Tests)
+        //        .Set(p => p.NeedRevisit, prescription.NeedRevisit);
+
+        //    await _prescriptionCollection.UpdateOneAsync(
+        //        p => p.DoctorId == prescriptionDetails.DoctorId && p.PatientId == prescriptionDetails.PatientId,
+        //        updateDefinition
+        //    );
+
+        //    return Ok(new { success = true });
+        //}
+
+
+
     }
 }
+
