@@ -1,5 +1,6 @@
 ﻿using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Bson;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 namespace MediCare.Models
 {
@@ -37,6 +38,9 @@ namespace MediCare.Models
 
         [BsonElement("DoctorImage")]
         public string DoctorImage { get; set; }
+
+        [BsonElement("Status")]
+        public string Status { get; set; } 
 
         
     }

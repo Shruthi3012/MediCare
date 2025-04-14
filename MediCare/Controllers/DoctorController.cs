@@ -163,6 +163,62 @@ namespace MediCare.Controllers
             return RedirectToAction("DoctorPage");
         }
 
+
+
+        [HttpPost]
+        public async Task<IActionResult> UpdateDoctor([FromBody] DoctorViewModel doctorViewModel)
+        {
+
+            var filter = Builders<Doctor>.Filter.Eq(s => s.ObjectId, doctorViewModel.UpdateDocId);
+            var doctor = await _dbcontext.Doctors.Find(filter).FirstOrDefaultAsync();
+
+            if (doctor == null)
+            {
+                return NotFound();
+            }
+            else
+            {
+                doctor.SpecializationId = doctorViewModel.Specialization;
+                doctor.Name = doctorViewModel.Name;
+                doctor.Age = doctorViewModel.Age;
+                doctor.Email = doctorViewModel.Email;
+                doctor.Degree = doctorViewModel.Degree;
+                doctor.Description = doctorViewModel.Description;
+
+                // Only update the image if a new one was provided
+                if (!string.IsNullOrEmpty(doctorViewModel.DoctorImage))
+                {
+                    doctor.DoctorImage = SaveFileFromBase64(doctorViewModel.DoctorImage, _webHostEnvironment);
+                }
+
+                if (TimeOnly.TryParse(doctorViewModel.StartTime, out TimeOnly startTime))
+                    doctor.StartTime = startTime;
+                if (TimeOnly.TryParse(doctorViewModel.EndTime, out TimeOnly endTime))
+                    doctor.EndTime = endTime;
+
+                // Create update definition
+                var update = Builders<Doctor>.Update
+                    .Set(d => d.SpecializationId, doctor.SpecializationId)
+                    .Set(d => d.Name, doctor.Name)
+                    .Set(d => d.Age, doctor.Age)
+                    .Set(d => d.Email, doctor.Email)
+                    .Set(d => d.Degree, doctor.Degree)
+                    .Set(d => d.Description, doctor.Description)
+                    .Set(d => d.StartTime, doctor.StartTime)
+                    .Set(d => d.EndTime, doctor.EndTime);
+
+                if (!string.IsNullOrEmpty(doctorViewModel.DoctorImage))
+                {
+                    update = update.Set(d => d.DoctorImage, doctor.DoctorImage);
+                }
+
+                await _dbcontext.Doctors.UpdateOneAsync(filter, update);
+
+                return RedirectToAction("DoctorPage");
+            }
+        }
+
+
         //public void AddAvailabitySlots(Doctor doctor)
         //{
 

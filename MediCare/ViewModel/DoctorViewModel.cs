@@ -4,6 +4,7 @@ namespace MediCare.ViewModel
 {
     public class DoctorViewModel
     {
+        public string UpdateDocId { get; set; }
         public string Name { get; set; }
         public string Email { get; set; }
         public int Age { get; set; }
@@ -25,6 +26,7 @@ namespace MediCare.ViewModel
         public string ObjectId { get; set; }
         public int Id { get; set; } 
         public string Name { get; set; }
+        public int Age { get; set; }
         public string Email { get; set; }
         public string Specialization { get; set; }
         public string StartTime { get; set; }
