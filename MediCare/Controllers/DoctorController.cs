@@ -115,6 +115,48 @@ namespace MediCare.Controllers
         }
 
 
+        [HttpGet]
+        public async Task<IActionResult> AllAppointments()
+        {
+           
+            List<Appointment> appointmentsLst = await _dbcontext.Appointments.Find(_ => true).ToListAsync();
+            if (appointmentsLst == null)
+            {
+                return NotFound();
+            }
+            
+            
+
+            List<AppointmentsViewModel> appointmentsViewModelList = new List<AppointmentsViewModel>();
+            foreach (Appointment appointment in appointmentsLst)
+            {
+                var doctor = await _dbcontext.Doctors.Find(s => s.ObjectId == appointment.DoctorId).FirstOrDefaultAsync();
+                if (doctor == null)
+                {
+                    return NotFound();
+                }
+                var specialization = await _dbcontext.Specializations.Find(s => s.ObjectId == doctor.SpecializationId).FirstOrDefaultAsync();
+                AppointmentsViewModel appointmentsViewModel = new AppointmentsViewModel();
+                appointmentsViewModel.AppId = appointment.ObjectId;
+                appointmentsViewModel.DoctorId = doctor.ObjectId;
+                appointmentsViewModel.DoctorName = doctor.Name;
+                appointmentsViewModel.BookedTime = appointment.BookedTime.ToString();
+                appointmentsViewModel.BookedDate = appointment.BookedDate.ToString();
+                appointmentsViewModel.Specialization = specialization != null ? specialization.SpecializationName : "Unknown";
+                if (appointment.PatientId != null)
+                {
+                    var patient = await _dbcontext.Patients.Find(s => s.ObjectId == appointment.PatientId).FirstOrDefaultAsync();
+                    appointmentsViewModel.PatientName = patient.Name;
+                    appointmentsViewModel.PatientId = patient.ObjectId;
+                }
+
+                appointmentsViewModelList.Add(appointmentsViewModel);
+            }
+
+            return View("DoctorAppointments", appointmentsViewModelList);
+
+        }
+
 
         [HttpGet]
         public async Task<IActionResult> DoctorPage()
