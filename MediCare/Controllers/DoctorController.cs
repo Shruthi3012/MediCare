@@ -121,7 +121,7 @@ namespace MediCare.Controllers
         {
             DoctorViewModel doctorViewModel = new DoctorViewModel();
             doctorViewModel.SpecializationList = await _dbcontext.Specializations.Find(_ => true).ToListAsync();
-            List<Doctor> doctors = await _dbcontext.Doctors.Find(_ => true).ToListAsync();
+            List<Doctor> doctors = await _dbcontext.Doctors.Find(d => d.Status != "No").ToListAsync();
             doctorViewModel.DoctorInfos = new List<DoctorInfo>();
             int i = 1;
             foreach (Doctor doctor in doctors)
@@ -219,10 +219,35 @@ namespace MediCare.Controllers
         }
 
 
-        //public void AddAvailabitySlots(Doctor doctor)
-        //{
 
-        //}
+        
+
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteDoctor([FromBody] DoctorViewModel doctorViewModel)
+        {
+
+            var filter = Builders<Doctor>.Filter.Eq(s => s.ObjectId, doctorViewModel.UpdateDocId);
+            var doctor = await _dbcontext.Doctors.Find(filter).FirstOrDefaultAsync();
+            if (doctor == null)
+            {
+                return NotFound();
+            }
+            else
+            {
+                // Create update definition to set Status to "No"
+                var update = Builders<Doctor>.Update
+                    .Set(d => d.Status, "No");
+
+                await _dbcontext.Doctors.UpdateOneAsync(filter, update);
+                return RedirectToAction("DoctorPage");
+            }
+
+            
+           
+        }
+
+
 
         [HttpPost]
         public async Task<IActionResult> AddAppointment([FromBody] DoctorDetailsViewModel doctorDetailsViewModel)
