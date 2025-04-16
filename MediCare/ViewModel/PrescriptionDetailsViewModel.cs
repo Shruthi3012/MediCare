@@ -17,6 +17,8 @@ namespace MediCare.ViewModel
 
         public string BookedDate { get; set; }
         public string Description { get; set; }
+        public string AppId { get; set; }
+        public string Prescription { get; set; }
         public List<string> Medicines { get; set; }
         public List<string> Tests { get; set; }
         public bool NeedRevisit { get; set; }

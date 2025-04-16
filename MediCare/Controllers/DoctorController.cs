@@ -432,50 +432,7 @@ namespace MediCare.Controllers
 
             return View(viewModel);
         }
-        //[HttpPost]
-        //public async Task<IActionResult> SavePrescription([FromBody] PrescriptionDetailsViewModel prescriptionDetails)
-        //{
-        //    if (prescriptionDetails == null || string.IsNullOrEmpty(prescriptionDetails.DoctorId) || string.IsNullOrEmpty(prescriptionDetails.PatientId))
-        //    {
-        //        return BadRequest("Invalid data.");
-        //    }
-
-        //    // Find the existing prescription
-        //    var prescription = await _prescriptionCollection
-        //        .Find(p => p.DoctorId == prescriptionDetails.DoctorId && p.PatientId == prescriptionDetails.PatientId)
-        //        .FirstOrDefaultAsync();
-
-        //    // If no existing prescription, create a new one
-        //    if (prescription == null)
-        //    {
-        //        prescription = new Prescription
-        //        {
-        //            DoctorId = prescriptionDetails.DoctorId,
-        //            PatientId = prescriptionDetails.PatientId,
-        //            PrescriptionDate = DateTime.Now
-        //        };
-        //        await _prescriptionCollection.InsertOneAsync(prescription);
-        //    }
-
-        //    // Update the prescription with new data
-        //    prescription.Medicines = prescriptionDetails.Medicines;
-        //    prescription.Tests = prescriptionDetails.Tests;
-        //    prescription.NeedRevisit = prescriptionDetails.NeedRevisit;
-
-        //    var updateDefinition = Builders<Prescription>.Update
-        //        .Set(p => p.Medicines, prescription.Medicines)
-        //        .Set(p => p.Tests, prescription.Tests)
-        //        .Set(p => p.NeedRevisit, prescription.NeedRevisit);
-
-        //    await _prescriptionCollection.UpdateOneAsync(
-        //        p => p.DoctorId == prescriptionDetails.DoctorId && p.PatientId == prescriptionDetails.PatientId,
-        //        updateDefinition
-        //    );
-
-        //    return Ok(new { success = true });
-        //}
-
-
+        
 
     }
 }
