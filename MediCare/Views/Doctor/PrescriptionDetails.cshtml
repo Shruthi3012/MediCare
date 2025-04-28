@@ -1,0 +1,166 @@
+﻿@model MediCare.ViewModel.PrescriptionDetailsViewModel
+<html>
+<head>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+          crossorigin="anonymous">
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+            crossorigin="anonymous"></script>
+
+    <style>
+        .info-card {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            background-color: #fff;
+        }
+
+        h3 {
+            margin-bottom: 20px;
+            color: #198754;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Doctor Information -->
+    <div class="info-card">
+        <h3>Doctor Information</h3>
+        <p><strong>Name:</strong> @Model.DoctorName</p>
+        <p><strong>Age:</strong> @Model.DoctorAge</p>
+        <p><strong>Email:</strong> @Model.DoctorEmail</p>
+        <p><strong>Specialization:</strong> @Model.DoctorSpecialization</p>
+        <p><strong>Degree:</strong> @Model.DoctorDegree</p>
+        <p><strong>Description:</strong> @Model.DoctorDescription</p>
+
+    </div>
+
+    <!-- Patient Information -->
+    <div class="info-card">
+        <h3>Patient Information</h3>
+        <p><strong>Name:</strong> @Model.PatientName</p>
+        <p><strong>Age:</strong> @Model.PatientAge</p>
+        <p><strong>Email:</strong> @Model.PatientEmail</p>
+        <p><strong>Phone Number:</strong> @Model.PhoneNumber</p>
+
+    </div>
+
+    <!-- Appointment Details -->
+    <div class="info-card">
+        <h3>Appointment Details</h3>
+        <p><strong>Appointment Date:</strong> @Model.BookedDate</p>
+        <p><strong>Appointment Time:</strong> @Model.BookedTime</p>
+        <p><strong>Patient History:</strong> @Model.Description</p>
+    </div>
+
+    <!-- Prescription Details -->
+    <div class="info-card">
+        <h3>Prescription Details</h3>
+        <div style="display: flex; align-items: flex-start; gap: 10px;">
+            <textarea class="form-control" rows="3" style="resize: none; width: 100%;" disabled>@(Model.Prescription ?? "No prescription provided yet.")</textarea>
+            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#updateBackdrop" style="height: 38px;">
+                <!-- Edit Icon -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" fill="currentColor" class="bi bi-pen" viewBox="0 0 16 16">
+                    <path d="m13.498.795.149-.149a1.207 1.207 0 1 1 1.707 1.708l-.149.148a1.5 1.5 0 0 1-.059 2.059L4.854 14.854a.5.5 0 0 1-.233.131l-4 1a.5.5 0 0 1-.606-.606l1-4a.5.5 0 0 1 .131-.232l9.642-9.642a.5.5 0 0 0-.642.056L6.854 4.854a.5.5 0 1 1-.708-.708L9.44.854A1.5 1.5 0 0 1 11.5.796a1.5 1.5 0 0 1 1.998-.001m-.644.766a.5.5 0 0 0-.707 0L1.95 11.756l-.764 3.057 3.057-.764L14.44 3.854a.5.5 0 0 0 0-.708z" />
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Review Details -->
+    <div class="info-card">
+        <h3>Review Details</h3>
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <textarea class="form-control" rows="3" style="resize: none; width: 100%;" disabled>@(Model.Rating.HasValue? $"Rating: {Model.Rating}/5{Environment.NewLine}Comments: {Model.Comments}": "No Review provided yet.")</textarea>
+
+            <button type="button" class="btn btn-success"onclick="openReviewModal('@Model.DoctorId', '@Model.PatientId', '@Model.AppId', '@Model.Rating', '@Model.Comments')">Rate</button>
+
+        </div>
+    </div>
+
+
+
+
+    <!-- Modal -->
+    <div class="modal fade" id="updateBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="updateBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form asp-action="UpdatePrescription" method="post">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="updateBackdropLabel">Edit Prescription</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="prescriptionText" class="form-label">Prescription</label>
+                            <textarea class="form-control" id="prescriptionText" name="prescriptionText" rows="4">@(Model.Prescription ?? "")</textarea>
+                        </div>
+                        <input type="hidden" name="AppId" value="@Model.AppId" />
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Update</button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="reviewModal" tabindex="-1" aria-labelledby="reviewModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form asp-action="SubmitReview" method="post">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="reviewModalLabel">Rate Doctor</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" id="doctorId" name="doctorId" />
+                        <input type="hidden" id="patientId" name="patientId" />
+                        <input type="hidden" id="appointmentId" name="appointmentId" value="@Model.AppId" />
+                        <div class="mb-3">
+                            <label for="rating" class="form-label">Rating (1-5)</label>
+                            <input type="number" min="1" max="5" class="form-control" id="rating" name="Rating" required />
+                        </div>
+                        <div class="mb-3">
+                            <label for="comments" class="form-label">Comments</label>
+                            <textarea class="form-control" id="comments" name="Comments" rows="3" required></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Submit Review</button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openReviewModal(doctorId, patientId, appointmentId, rating, comments) {
+            document.getElementById('doctorId').value = doctorId;
+            document.getElementById('patientId').value = patientId;
+            document.getElementById('appointmentId').value = appointmentId;
+
+            // Prefill the modal with rating and comments
+            document.getElementById('rating').value = rating || ''; // Default to empty if no rating
+            document.getElementById('comments').value = comments || ''; // Default to empty if no comments
+
+            var modal = new bootstrap.Modal(document.getElementById('reviewModal'));
+            modal.show();
+        }
+    </script>
+
+
+
+
+</body>
+</html>

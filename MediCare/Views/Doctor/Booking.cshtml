@@ -1,0 +1,573 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+   
+
+}
+@model MediCare.ViewModel.DoctorDetailsViewModel
+
+<head>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <style>
+        .day-cell.past-date {
+            color: #ccc;
+            text-decoration: line-through;
+            cursor: not-allowed;
+            background-color: #f9f9f9;
+            opacity: 0.7;
+            pointer-events: none;
+        }
+        .calendar-container {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .calendar-nav {
+            cursor: pointer;
+            background: #f8f9fa;
+            border: none;
+            border-radius: 5px;
+            padding: 5px 10px;
+        }
+
+        .calendar-title {
+            font-weight: bold;
+            font-size: 1.2rem;
+            text-align: center;
+        }
+
+        .calendar-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            text-align: center;
+        }
+
+        .day-header {
+            font-weight: bold;
+            padding: 10px 0;
+        }
+
+        .day-cell {
+            padding: 10px 0;
+            border: 1px solid #eee;
+            cursor: pointer;
+        }
+
+            .day-cell:hover {
+                background-color: #f8f9fa;
+            }
+
+            .day-cell.inactive {
+                color: #ccc;
+            }
+
+            .day-cell.today {
+                background-color: #007bff;
+                color: white;
+            }
+
+            .day-cell.selected {
+                background-color: #28a745;
+                color: white;
+            }
+
+        .time-slots {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .time-slot {
+            padding: 8px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+            .time-slot:hover {
+                background-color: #f8f9fa;
+            }
+
+            .time-slot.selected {
+                background-color: #28a745;
+                color: white;
+            }
+
+        .booking-btn {
+            margin-top: 20px;
+        }
+
+        .time-slot.booked {
+            background-color: #f0f0f0;
+            color: #aaa;
+            cursor: not-allowed;
+            text-decoration: line-through;
+            opacity: 0.7;
+        }
+
+            .time-slot.booked:hover {
+                background-color: #f0f0f0;
+            }
+    </style>
+
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-10"></div>
+            <div class="col-sm-2">
+                <button type="button" class="btn btn-success" onclick="location.href='@Url.Action("DoctorAppointments", "Doctor", new { id = Model.DoctorID })'">View Appointments</button>
+
+            </div>
+        </div>
+        <div class="row justify-content-center">
+            <div class="col-sm-2"></div>
+            <div class="col-sm-8">
+                <form class="shadow p-3 mb-5 rounded-3" >
+                    
+                    <div class="row text-center">
+                        <h3>@Model.Name</h3>
+                    </div>
+                   
+                    <div class="row">
+                        <div class="col-sm-4">
+                            @if (!string.IsNullOrEmpty(Model.DoctorImage))
+                            {
+                                <img src="@Model.DoctorImage" alt="Doctor Photo" class="img-fluid custom-img-size">
+                            }
+                        </div>
+
+                        <div class="col-sm-8">
+
+                            <b>Degree: </b>@Model.Degree
+                            <br />
+                            <b>Email: </b>@Model.Email
+                            <br />
+                            <b>Specialization: </b>@Model.Specialization
+                            <br />
+                            <b>Time: </b>@Model.StartTime - @Model.EndTime
+                            <br /><br />
+                           
+                           
+                           
+                        </div>
+                    </div> 
+                    <br />
+                    @Model.DoctorDesc
+                    <br /> <br />
+                    <!-- Calendar Section -->
+                    <div class="calendar-container">
+                        <div class="calendar-header">
+                            <button type="button" class="calendar-nav" id="prevMonth">&lt;&lt;</button>
+                            <div class="calendar-title" id="currentMonth">April 2025</div>
+                            <button type="button" class="calendar-nav" id="nextMonth">&gt;&gt;</button>
+                        </div>
+                        <div class="calendar-days" id="calendarDays">
+                            <div class="day-header">MON</div>
+                            <div class="day-header">TUE</div>
+                            <div class="day-header">WED</div>
+                            <div class="day-header">THU</div>
+                            <div class="day-header">FRI</div>
+                            <div class="day-header">SAT</div>
+                            <div class="day-header">SUN</div>
+                            <!-- Calendar cells will be generated by JavaScript -->
+                        </div>
+                    </div>
+
+                    <!-- Available Slots Section -->
+                    <div id="availableSlotsSection" style="display: none;">
+                        <h4>Available Slots</h4>
+                        <div class="time-slots" id="timeSlots">
+                            <!-- Time slots will be generated by JavaScript -->
+                        </div>
+                        <div class="text-center mt-4">
+                            <button type="button" class="btn btn-success booking-btn" data-bs-toggle="modal" data-bs-target="#exampleModal" >Book Appointment</button>
+                        </div>
+                    </div>
+                    <br />
+                </form>
+              
+            </div>
+            <div class="col-sm-2"></div>
+        </div>
+    </div>
+    <br /><br />
+
+
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="PatientModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="patientModalLabel">Add Patient</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="mb-3">
+                            <label for="patName" class="col-form-label">Name</label>
+                            <input type="text" class="form-control" id="patName">
+                        </div>
+                        <div class="mb-3">
+                            <label for="patEmail" class="col-form-label">Email</label>
+                            <input type="email" class="form-control" id="patEmail">
+                        </div>
+                        <div class="mb-3">
+                            <label for="patPhone" class="col-form-label">Cell Number</label>
+                            <input type="text" class="form-control" id="patPhone">
+                        </div>
+                        <div class="mb-3">
+                            <label for="patAge" class="col-form-label">Age</label>
+                            <input type="number" class="form-control" id="patAge">
+                        </div>
+                       
+                        <div class="mb-3">
+                            <label for="patDescription" class="col-form-label">Description</label>
+                            <textarea class="form-control " style="min-height:80px;" id="patDescription" rows="3" placeholder="Provide Patient description here or any other information to let the doctor know "></textarea>
+                        </div>
+                    </form>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-success" id="bookAppointment">Book</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+
+        var bookedAppointments = [
+        @if (Model.Appointments != null)
+        {
+            foreach (var appointment in Model.Appointments)
+            {
+                @:{ date: "@appointment.BookedDate", time: "@appointment.BookedTime" },
+            }
+        }
+                ];
+
+        console.log(bookedAppointments);
+        function isTimeSlotBooked(date, timeSlot) {
+            
+            const year = date.getFullYear();
+            const month = date.getMonth() + 1;
+            const day = date.getDate();
+            const formattedDateYMD = year + '-' +
+                (month < 10 ? '0' : '') + month + '-' +
+                (day < 10 ? '0' : '') + day;
+
+          
+            const formattedDateDMY =
+                (day < 10 ? '0' : '') + day + '-' +
+                (month < 10 ? '0' : '') + month + '-' +
+                year;
+
+            console.log("Checking if booked:", formattedDateYMD, "or", formattedDateDMY, timeSlot);
+
+            
+            const isBooked = bookedAppointments.some(appointment => {
+                
+                const appDate = appointment.date ? appointment.date.trim() : '';
+                const appTime = appointment.time ? appointment.time.trim() : '';
+
+                console.log("Comparing with:", appDate, appTime);
+
+                
+                const dateMatches = (appDate === formattedDateYMD || appDate === formattedDateDMY);
+
+                
+                const timeMatches = appTime === timeSlot;
+
+                console.log(`Date match: ${dateMatches}, Time match: ${timeMatches}`);
+
+                return dateMatches && timeMatches;
+            });
+
+            console.log("Slot is booked:", isBooked);
+            return isBooked;
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            
+            let currentDate = new Date();
+            let selectedDate = null;
+            let selectedTimeSlot = null;
+
+            
+            const startTime = parseTime('@Model.StartTime');
+            const endTime = parseTime('@Model.EndTime');
+
+            function parseTime(timeString) {
+                const [hours, minutes] = timeString.split(':');
+                return { hours: parseInt(hours), minutes: parseInt(minutes) };
+            }
+
+            
+            updateCalendar(currentDate);
+
+            
+            document.getElementById('prevMonth').addEventListener('click', function () {
+                currentDate.setMonth(currentDate.getMonth() - 1);
+                updateCalendar(currentDate);
+            });
+
+            document.getElementById('nextMonth').addEventListener('click', function () {
+                currentDate.setMonth(currentDate.getMonth() + 1);
+                updateCalendar(currentDate);
+            });
+
+            
+            function updateCalendar(date) {
+                const year = date.getFullYear();
+                const month = date.getMonth();
+
+                
+                const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                    'July', 'August', 'September', 'October', 'November', 'December'];
+                document.getElementById('currentMonth').textContent = monthNames[month] + ' ' + year;
+
+                
+                const calendarDays = document.getElementById('calendarDays');
+
+                
+                const headerRow = calendarDays.querySelectorAll('.day-header');
+                calendarDays.innerHTML = '';
+                headerRow.forEach(header => calendarDays.appendChild(header));
+
+                
+                const firstDay = new Date(year, month, 1);
+                let startingDay = firstDay.getDay(); 
+                if (startingDay === 0) startingDay = 7; 
+                const lastDay = new Date(year, month + 1, 0);
+                const totalDays = lastDay.getDate();
+
+                
+                const prevLastDay = new Date(year, month, 0);
+                const prevDays = prevLastDay.getDate();
+
+                
+                const today = new Date();
+                today.setHours(0, 0, 0, 0); 
+
+                
+                for (let i = startingDay - 1; i > 0; i--) {
+                    const dayCell = document.createElement('div');
+                    dayCell.className = 'day-cell inactive';
+                    dayCell.textContent = prevDays - i + 1;
+                    calendarDays.appendChild(dayCell);
+                }
+
+                
+                for (let i = 1; i <= totalDays; i++) {
+                    const dayCell = document.createElement('div');
+                    dayCell.className = 'day-cell';
+                    dayCell.textContent = i;
+
+                    
+                    const cellDate = new Date(year, month, i);
+                    cellDate.setHours(0, 0, 0, 0); 
+
+                    
+                    if (year === today.getFullYear() && month === today.getMonth() && i === today.getDate()) {
+                        dayCell.classList.add('today');
+                    }
+
+                    
+                    if (cellDate < today) {
+                        dayCell.classList.add('inactive');
+                        dayCell.classList.add('past-date');
+                        
+                        dayCell.style.color = '#ccc';
+                        dayCell.style.textDecoration = 'line-through';
+                        dayCell.style.cursor = 'not-allowed';
+                    } else {
+                        
+                        dayCell.addEventListener('click', function () {
+                            
+                            document.querySelectorAll('.day-cell').forEach(cell => {
+                                cell.classList.remove('selected');
+                            });
+
+                            
+                            this.classList.add('selected');
+
+                            
+                            selectedDate = new Date(year, month, i);
+
+                            
+                            generateTimeSlots(selectedDate);
+
+                           
+                            document.getElementById('availableSlotsSection').style.display = 'block';
+                        });
+                    }
+
+                    
+                    if (selectedDate && year === selectedDate.getFullYear() &&
+                        month === selectedDate.getMonth() && i === selectedDate.getDate()) {
+                        dayCell.classList.add('selected');
+                    }
+
+                    calendarDays.appendChild(dayCell);
+                }
+
+                
+                const totalCells = 42; 
+                const nextDays = totalCells - (startingDay - 1 + totalDays);
+
+                
+                for (let i = 1; i <= nextDays; i++) {
+                    const dayCell = document.createElement('div');
+                    dayCell.className = 'day-cell inactive';
+                    dayCell.textContent = i;
+                    calendarDays.appendChild(dayCell);
+                }
+            }
+
+            
+            function generateTimeSlots(date) {
+                const timeSlots = document.getElementById('timeSlots');
+                timeSlots.innerHTML = ''; 
+
+                
+                const startMinutes = startTime.hours * 60 + startTime.minutes;
+                const endMinutes = endTime.hours * 60 + endTime.minutes;
+
+                
+                for (let minutes = startMinutes; minutes < endMinutes; minutes += 15) {
+                    const hours = Math.floor(minutes / 60);
+                    const mins = minutes % 60;
+
+                   
+                    const formattedTime =
+                        (hours < 10 ? '0' : '') + hours + ':' +
+                        (mins < 10 ? '0' : '') + mins;
+
+                    
+                    const timeSlot = document.createElement('div');
+                    timeSlot.className = 'time-slot';
+
+                    
+                    timeSlot.dataset.time24 = formattedTime;
+
+                    
+                    const displayHours = hours % 12 || 12;
+                    const amPm = hours < 12 ? 'AM' : 'PM';
+                    timeSlot.textContent = displayHours + ':' + (mins < 10 ? '0' : '') + mins + ' ' + amPm;
+
+                   
+                    const isBooked = isTimeSlotBooked(date, formattedTime);
+
+                    if (isBooked) {
+                        timeSlot.classList.add('booked');
+                       
+                        console.log(`Slot ${formattedTime} is marked as booked`);
+                    } else {
+                        
+                        timeSlot.addEventListener('click', function () {
+                            
+                            document.querySelectorAll('.time-slot').forEach(slot => {
+                                slot.classList.remove('selected');
+                            });
+
+                            
+                            this.classList.add('selected');
+
+                            
+                            selectedTimeSlot = formattedTime;
+                        });
+                    }
+
+                    timeSlots.appendChild(timeSlot);
+                }
+            }
+            
+            document.getElementById('bookAppointment').addEventListener('click', async function () {
+                if (!selectedDate || !selectedTimeSlot) {
+                    alert('Please select a date and time slot.');
+                    return;
+                }
+
+                
+                const day = selectedDate.getDate();
+                const month = selectedDate.getMonth() + 1;
+                const year = selectedDate.getFullYear();
+                const formattedDate = year + '-' +
+                    (month < 10 ? '0' : '') + month + '-' +
+                    (day < 10 ? '0' : '') + day;
+
+                
+                console.log('Booking appointment for:', formattedDate, selectedTimeSlot);
+
+                 const DocID = "@Model.DoctorID";
+                const PatName = document.getElementById("patName").value;
+
+                const PatEmail = document.getElementById("patEmail").value;
+                const PatAge = document.getElementById("patAge").value;
+                
+                const PatPhone = document.getElementById("patPhone").value;
+                const PatDesc = document.getElementById("patDescription").value;
+                
+                
+
+                const data = {
+                    DoctorID: DocID,
+                    Bookedtime: selectedTimeSlot,
+                    BookedDate: formattedDate,
+                    AppointmentDescription: PatDesc,
+                    PatientName: PatName,
+                    PatientEmail: PatEmail,
+                    PatientPhone: PatPhone,
+                    PatientAge: PatAge
+                };
+
+                try {
+                    const jsonData = JSON.stringify(data);
+                    console.log("Sending data to server:", data);
+                    const response = await fetch('/Doctor/AddAppointment', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json; charset=utf-8'
+                        },
+                        body: jsonData
+                    });
+
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        console.error('Server response:', errorText);
+                        throw new Error('Failed to book appointment');
+                    }
+
+                    window.location.reload();
+                    console.log('Booked appointment successfully');
+                } catch (error) {
+                    console.error('Error:', error);
+                    window.location.reload();
+                }
+
+
+               
+               // alert('Appointment booked for ' + day + '/' + month + '/' + year + ' at ' + selectedTimeSlot);
+            });
+        });
+    </script>
+</body>
+
+
