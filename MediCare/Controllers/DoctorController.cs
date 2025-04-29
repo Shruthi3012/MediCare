@@ -85,15 +85,21 @@ namespace MediCare.Controllers
                 AppointmentsViewModel appointmentsViewModel = new AppointmentsViewModel();
                 appointmentsViewModel.AppId = appointment.ObjectId;
                 appointmentsViewModel.DoctorId = doctor.ObjectId;
+                appointmentsViewModel.StartTime = doctor.StartTime.ToString();
+                appointmentsViewModel.EndTime = doctor.EndTime.ToString();
                 appointmentsViewModel.DoctorName = doctor.Name;
                 appointmentsViewModel.BookedTime = appointment.BookedTime.ToString();
                 appointmentsViewModel.BookedDate = appointment.BookedDate.ToString();
                 appointmentsViewModel.Specialization = specialization != null ? specialization.SpecializationName : "Unknown";
+                appointmentsViewModel.Description = appointment.Description;
                 if (appointment.PatientId != null)
                 {
                     var patient = await _dbcontext.Patients.Find(s => s.ObjectId == appointment.PatientId).FirstOrDefaultAsync();
                     appointmentsViewModel.PatientName = patient.Name;
                     appointmentsViewModel.PatientId = patient.ObjectId;
+                    appointmentsViewModel.PatientEmail = patient.Email;
+                    appointmentsViewModel.PatientAge = patient.Age;
+                    appointmentsViewModel.PatientPhone = patient.Phone;
                 }
                 appointmentsViewModelList.Add(appointmentsViewModel);
             }
@@ -161,6 +167,7 @@ namespace MediCare.Controllers
                 doctorInfo.Name = doctor.Name;
                 doctorInfo.Email = doctor.Email;
                 doctorInfo.Degree = doctor.Degree;
+                doctorInfo.Age = doctor.Age;
                 doctorInfo.StartTime = doctor.StartTime.ToString();
                 doctorInfo.EndTime = doctor.EndTime.ToString();
                 doctorInfo.Description = doctor.Description;
