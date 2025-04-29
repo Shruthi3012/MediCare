@@ -420,6 +420,29 @@ namespace MediCare.Controllers
             return RedirectToAction("PrescriptionDetails", new { doctorId = doctorId, patientId = patientId, appointmentId = appointmentId });
         }
 
+        [HttpPost]
+        public async Task<IActionResult> DeleteReview(string doctorId, string patientId, string appointmentId)
+        {
+            if (string.IsNullOrEmpty(appointmentId))
+            {
+                return BadRequest("Appointment ID is required.");
+            }
+
+            var filter = Builders<Review>.Filter.Eq(r => r.DoctorId, doctorId) &
+                         Builders<Review>.Filter.Eq(r => r.PatientId, patientId) &
+                         Builders<Review>.Filter.Eq(r => r.AppId, appointmentId);
+
+            var result = await _dbcontext.Reviews.DeleteOneAsync(filter);
+
+            if (result.DeletedCount == 0)
+            {
+                return NotFound("Review not found to delete.");
+            }
+
+            return RedirectToAction("PrescriptionDetails", new { doctorId = doctorId, patientId = patientId, appointmentId = appointmentId });
+        }
+
+
 
         [HttpGet]
         public async Task<IActionResult> GetAvailableTimeSlots(string doctorId, string date)
