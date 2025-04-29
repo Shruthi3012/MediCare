@@ -26,7 +26,7 @@ namespace MediCare.ViewModel
         public string Prescription { get; set; }
         public DateTime PrescriptionDate { get; set; }
         public IEnumerable<Review> Reviews { get; set; }
-        public int? Rating { get; set; } // Use nullable int for rating
+        public int? Rating { get; set; } 
         public string Comments { get; set; }
         public DateTime? UpdatedDate { get; set; }
     }

@@ -30,11 +30,11 @@ namespace MediCare.Controllers
         {
             try
             {
-                // Attempt to list all collections in the database to check the connection
+                
                 var collections = await _context.GetDatabase().ListCollectionNamesAsync();
                 var collectionList = await collections.ToListAsync();
 
-                // If we get a list of collections, the connection is successful
+                
                 return Content($"MongoDB Connection Successful! Collections: {string.Join(", ", collectionList)}");
             }
             catch (Exception ex)

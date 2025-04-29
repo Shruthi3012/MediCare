@@ -14,7 +14,6 @@ namespace MediCare.Models
         public string DoctorId { get; set; }
 
         [BsonElement("patient_id")]
-        //[BsonRepresentation(BsonType.ObjectId)]
         public string PatientId { get; set; }
 
         [BsonElement("rating")]

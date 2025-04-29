@@ -384,7 +384,7 @@ namespace MediCare.Controllers
             }
 
             var filter = Builders<Appointment>.Filter.Eq(a => a.ObjectId, AppId);
-            var update = Builders<Appointment>.Update.Set(a => a.Prescription, prescriptionText ?? string.Empty); // Allow empty string
+            var update = Builders<Appointment>.Update.Set(a => a.Prescription, prescriptionText ?? string.Empty); 
 
             var result = await _dbcontext.Appointments.UpdateOneAsync(filter, update);
 
