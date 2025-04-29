@@ -21,5 +21,8 @@ namespace MediCare.Models
         [BsonElement("Age")]
         public int Age { get; set; }
 
+        [BsonElement("IsDeleted")]
+        public bool IsDeleted { get; set; } = false;
+
     }
 }

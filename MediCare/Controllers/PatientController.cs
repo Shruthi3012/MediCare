@@ -20,7 +20,7 @@ namespace MediCare.Controllers
         [HttpGet]
         public async Task<IActionResult> PatientDetails()
         {
-            var patients = await _dbcontext.Patients.Find(_ => true).ToListAsync();
+            var patients = await _dbcontext.Patients.Find(p => !p.IsDeleted).ToListAsync();
 
             var patientListViewModel = new List<PatientDetailsViewModel>();
 
@@ -81,8 +81,22 @@ namespace MediCare.Controllers
         [HttpPost]
         public async Task<IActionResult> DeletePatient(string id)
         {
-            await _dbcontext.Patients.DeleteOneAsync(p => p.ObjectId == id);
-            return RedirectToAction(nameof(PatientDetails));
+            var filter = Builders<Patient>.Filter.Eq(p => p.ObjectId, id);
+            var patient = await _dbcontext.Patients.Find(filter).FirstOrDefaultAsync();
+
+            if (patient == null)
+            {
+                return NotFound();
+            }
+
+            var update = Builders<Patient>.Update
+                .Set(p => p.IsDeleted, true);
+
+            await _dbcontext.Patients.UpdateOneAsync(filter, update);
+
+            return RedirectToAction("PatientDetails");
         }
+
+
     }
 }
