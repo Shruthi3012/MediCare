@@ -16,7 +16,7 @@
 
 <div class="container mt-4">
     <div class="row d-flex align-items-stretch">
-        <div class="col-md-4 mb-4 d-flex">
+        <div class="col-md-6 mb-4 d-flex">
             <div class="card w-100 h-100">
                 <div class="card-body">
                     <h5 class="card-title">Appointments</h5>
@@ -25,7 +25,7 @@
             </div>
         </div>
 
-        <div class="col-md-4 mb-4 d-flex">
+        <div class="col-md-6 mb-4 d-flex">
             <div class="card w-100 h-100">
                 <div class="card-body">
                     <h5 class="card-title">Doctor Ratings</h5>
@@ -34,14 +34,7 @@
             </div>
         </div>
 
-        <div class="col-md-4 mb-4 d-flex">
-            <div class="card w-100 h-100">
-                <div class="card-body">
-                    <h5 class="card-title">Prescriptions</h5>
-                    <canvas id="prescriptionChart"></canvas>
-                </div>
-            </div>
-        </div>
+       
     </div>
 </div>
 
@@ -80,17 +73,5 @@
         }
     });
 
-    new Chart(document.getElementById('prescriptionChart'), {
-        type: 'line',
-        data: {
-            labels: prescriptionDates,
-            datasets: [{
-                label: 'Prescriptions',
-                data: prescriptionCounts,
-                backgroundColor: 'rgba(75, 192, 192, 0.5)',
-                borderColor: 'rgba(75, 192, 192, 1)',
-                fill: true
-            }]
-        }
-    });
+   
 </script>

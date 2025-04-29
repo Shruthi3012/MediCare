@@ -278,7 +278,7 @@ namespace MediCare.Controllers
                 newAppointment.BookedDate = bookedDate;
             newAppointment.Description = doctorDetailsViewModel.AppointmentDescription;
             Patient patient = await _dbcontext.Patients.Find(s => s.Name == doctorDetailsViewModel.PatientName
-            && s.Email == doctorDetailsViewModel.Email
+            && s.Email == doctorDetailsViewModel.PatientEmail
             && s.Phone == doctorDetailsViewModel.PatientPhone).FirstOrDefaultAsync();
             if (patient != null)
             {
@@ -553,9 +553,9 @@ namespace MediCare.Controllers
                 appointment.Description = appointmentsViewModel.Description;
                 var patfilter = Builders<Patient>.Filter.Eq(s => s.ObjectId, appointmentsViewModel.PatientId);
                 var patient = await _dbcontext.Patients.Find(patfilter).FirstOrDefaultAsync();
-                if (patient.Email == appointmentsViewModel.PatientEmail &&
-                    patient.Phone == appointmentsViewModel.PatientPhone)
-                {
+                //if (patient.Email == appointmentsViewModel.PatientEmail &&
+                //    patient.Phone == appointmentsViewModel.PatientPhone)
+                //{
                     //patient.Name = appointmentsViewModel.PatientName;
                     //patient.Age = appointmentsViewModel.PatientAge;
                     var patupdate = Builders<Patient>.Update
@@ -564,17 +564,17 @@ namespace MediCare.Controllers
                         .Set(p => p.Phone, appointmentsViewModel.PatientPhone)
                         .Set(p => p.Age, appointmentsViewModel.PatientAge);
                   await  _dbcontext.Patients.UpdateOneAsync(patfilter, patupdate);
-                }
-                else
-                {
-                    Patient newPatient = new Patient();
-                    newPatient.Email = appointmentsViewModel.PatientEmail;
-                    newPatient.Age = appointmentsViewModel.PatientAge;
-                    newPatient.Phone = appointmentsViewModel.PatientPhone;
-                    newPatient.Name = appointmentsViewModel.PatientName;
-                    await _dbcontext.Patients.InsertOneAsync(newPatient);
-                    appointment.PatientId = newPatient.ObjectId;
-                }
+                //}
+                //else
+                //{
+                //    Patient newPatient = new Patient();
+                //    newPatient.Email = appointmentsViewModel.PatientEmail;
+                //    newPatient.Age = appointmentsViewModel.PatientAge;
+                //    newPatient.Phone = appointmentsViewModel.PatientPhone;
+                //    newPatient.Name = appointmentsViewModel.PatientName;
+                //    await _dbcontext.Patients.InsertOneAsync(newPatient);
+                //    appointment.PatientId = newPatient.ObjectId;
+                //}
 
                 var appupdate = Builders<Appointment>.Update
                         .Set(a => a.PatientId, appointment.PatientId)
