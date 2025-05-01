@@ -28,8 +28,7 @@ namespace MediCare.Models
         [BsonElement("Description")]
         public string Description { get; set; }
 
-        [BsonElement("Prescription")]
-        public string Prescription { get; set; }
+        
 
 
     }

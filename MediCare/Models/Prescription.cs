@@ -15,6 +15,9 @@ namespace MediCare.Models
         [BsonElement("PatientId")]
         public string PatientId { get; set; }
 
+        [BsonElement("AppId")]
+        public string AppId { get; set; }
+
         [BsonElement("Prescription")]
         public string PrescriptionText { get; set; }
 

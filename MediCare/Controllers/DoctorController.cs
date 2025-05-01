@@ -332,49 +332,49 @@ namespace MediCare.Controllers
             }
         }
 
-        [HttpGet]
-        public async Task<IActionResult> PrescriptionDetails(string doctorId, string patientId , string appointmentId)
+       [HttpGet]
+    public async Task<IActionResult> PrescriptionDetails(string doctorId, string patientId, string appointmentId)
+    {
+        if (string.IsNullOrEmpty(doctorId) || string.IsNullOrEmpty(patientId))
         {
-            if (string.IsNullOrEmpty(doctorId) || string.IsNullOrEmpty(patientId))
-            {
-                return BadRequest("Doctor ID and Patient ID are required.");
-            }
-
-            var doctor = await _dbcontext.Doctors.Find(d => d.ObjectId == doctorId).FirstOrDefaultAsync();
-            Patient patient = await _dbcontext.Patients.Find(p => p.ObjectId == patientId).FirstOrDefaultAsync();
-            var appointment = await _dbcontext.Appointments.Find(a => a.ObjectId == appointmentId ).FirstOrDefaultAsync();
-            var specialization = await _dbcontext.Specializations.Find(s => s.ObjectId == doctor.SpecializationId).FirstOrDefaultAsync();
-
-            var review = await _dbcontext.Reviews
-    .Find(r => r.DoctorId == doctor.ObjectId && r.PatientId == patient.ObjectId && r.AppId == appointmentId)
-    .FirstOrDefaultAsync();
-
-            var viewModel = new PrescriptionDetailsViewModel
-            {
-                DoctorId = doctor.ObjectId,
-                PatientId = patient.ObjectId,
-                DoctorName = doctor.Name,
-                DoctorAge = doctor.Age,
-                DoctorEmail = doctor.Email,
-                DoctorSpecialization = specialization?.SpecializationName ?? "Unknown",
-                DoctorDegree = doctor.Degree,
-                DoctorDescription = doctor.Description,
-                PatientName = patient.Name,
-                PatientAge = patient.Age,
-                PatientEmail = patient.Email,
-                PhoneNumber = patient.Phone,
-                BookedTime = appointment.BookedTime.ToString(),
-                BookedDate = appointment.BookedDate.ToString(),
-                Description = appointment.Description,
-                Prescription = appointment.Prescription,
-                AppId = appointmentId,
-                Rating = review?.Rating,
-                Comments = review?.Comments,
-                UpdatedDate = review?.UpdatedDate
-            };
-
-            return View(viewModel);
+            return BadRequest("Doctor ID and Patient ID are required.");
         }
+
+        var doctor = await _dbcontext.Doctors.Find(d => d.ObjectId == doctorId).FirstOrDefaultAsync();
+        var patient = await _dbcontext.Patients.Find(p => p.ObjectId == patientId).FirstOrDefaultAsync();
+        var appointment = await _dbcontext.Appointments.Find(a => a.ObjectId == appointmentId).FirstOrDefaultAsync();
+        var specialization = await _dbcontext.Specializations.Find(s => s.ObjectId == doctor.SpecializationId).FirstOrDefaultAsync();
+        var review = await _dbcontext.Reviews.Find(r => r.DoctorId == doctor.ObjectId && r.PatientId == patient.ObjectId && r.AppId == appointmentId).FirstOrDefaultAsync();
+        var prescription = await _dbcontext.Prescriptions.Find(p => p.PatientId == patientId && p.DoctorId == doctorId && p.AppId == appointmentId).FirstOrDefaultAsync();
+
+
+                var viewModel = new PrescriptionDetailsViewModel
+        {
+            DoctorId = doctor.ObjectId,
+            PatientId = patient.ObjectId,
+            DoctorName = doctor.Name,
+            DoctorAge = doctor.Age,
+            DoctorEmail = doctor.Email,
+            DoctorSpecialization = specialization?.SpecializationName ?? "Unknown",
+            DoctorDegree = doctor.Degree,
+            DoctorDescription = doctor.Description,
+            PatientName = patient.Name,
+            PatientAge = patient.Age,
+            PatientEmail = patient.Email,
+            PhoneNumber = patient.Phone,
+            BookedTime = appointment.BookedTime.ToString(),
+            BookedDate = appointment.BookedDate.ToString(),
+            Description = appointment.Description,
+            Prescription = prescription?.PrescriptionText,
+            AppId = appointmentId,
+            Rating = review?.Rating,
+            Comments = review?.Comments,
+            UpdatedDate = review?.UpdatedDate
+        };
+
+        return View(viewModel);
+    }
+
         [HttpPost]
         public async Task<IActionResult> UpdatePrescription(string prescriptionText, string AppId)
         {
@@ -383,18 +383,52 @@ namespace MediCare.Controllers
                 return BadRequest("Appointment ID is required.");
             }
 
-            var filter = Builders<Appointment>.Filter.Eq(a => a.ObjectId, AppId);
-            var update = Builders<Appointment>.Update.Set(a => a.Prescription, prescriptionText ?? string.Empty); 
+            var appointment = await _dbcontext.Appointments
+                .Find(a => a.ObjectId == AppId)
+                .FirstOrDefaultAsync();
 
-            var result = await _dbcontext.Appointments.UpdateOneAsync(filter, update);
-
-            if (result.ModifiedCount == 0)
+            if (appointment == null)
             {
-                return NotFound("Appointment not found or prescription not updated.");
+                return NotFound("Appointment not found.");
             }
 
-            var appointment = await _dbcontext.Appointments.Find(a => a.ObjectId == AppId).FirstOrDefaultAsync();
-            return RedirectToAction("PrescriptionDetails", new { doctorId = appointment.DoctorId, patientId = appointment.PatientId, appointmentId = appointment.ObjectId });
+            var existingPrescription = await _dbcontext.Prescriptions
+                .Find(p => p.DoctorId == appointment.DoctorId &&
+                           p.PatientId == appointment.PatientId &&
+                           p.AppId == AppId)
+                .FirstOrDefaultAsync();
+
+            if (existingPrescription != null)
+            {
+                var update = Builders<Prescription>.Update
+                    .Set(p => p.PrescriptionText, prescriptionText)
+                    .Set(p => p.PrescriptionDate, DateTime.UtcNow);
+
+                await _dbcontext.Prescriptions.UpdateOneAsync(
+                    p => p.PrescriptionId == existingPrescription.PrescriptionId,
+                    update
+                );
+            }
+            else
+            {
+                var newPrescription = new Prescription
+                {
+                    DoctorId = appointment.DoctorId,
+                    PatientId = appointment.PatientId,
+                    AppId = AppId,
+                    PrescriptionText = prescriptionText,
+                    PrescriptionDate = DateTime.UtcNow
+                };
+
+                await _dbcontext.Prescriptions.InsertOneAsync(newPrescription);
+            }
+
+            return RedirectToAction("PrescriptionDetails", new
+            {
+                doctorId = appointment.DoctorId,
+                patientId = appointment.PatientId,
+                appointmentId = AppId
+            });
         }
 
 
